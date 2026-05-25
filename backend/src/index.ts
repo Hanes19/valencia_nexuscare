@@ -135,7 +135,46 @@ app.get('/api/stats', async (req, res) => {
     
 });
 
+// ─── ROOM ROUTES ─────────────────────────────────────────────────
 
+app.get('/api/rooms', async (req, res) => {
+    const rooms = await prisma.room.findMany({ orderBy: { createdAt: 'asc' } });
+    res.json(rooms);
+});
+
+app.post('/api/rooms', async (req, res) => {
+    const { name, type, department } = req.body;
+    if (!name || !type || !department) {
+        return res.status(400).json({ error: 'name, type, and department are required' });
+    }
+    const room = await prisma.room.create({ data: { name, type, department } });
+    await prisma.auditLog.create({ data: { action: 'CREATED', entity: 'Room', entityId: room.id, details: `${name} added to ${department}` } });
+    io.emit('rooms:updated', room);
+    res.status(201).json(room);
+});
+
+app.patch('/api/rooms/:id', async (req, res) => {
+    const { status, currentPatientId } = req.body;
+    const room = await prisma.room.update({
+        where: { id: req.params.id },
+        data: {
+            ...(status && { status }),
+            ...(currentPatientId !== undefined && { currentPatientId }),
+        }
+    });
+    await prisma.auditLog.create({ data: { action: 'UPDATED', entity: 'Room', entityId: room.id, details: `${room.name} status → ${room.status}` } });
+    io.emit('rooms:updated', room);
+    res.json(room);
+});
+
+app.delete('/api/rooms/:id', async (req, res) => {
+    const room = await prisma.room.findUnique({ where: { id: req.params.id } });
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+    await prisma.room.delete({ where: { id: req.params.id } });
+    await prisma.auditLog.create({ data: { action: 'DELETED', entity: 'Room', entityId: req.params.id, details: `${room.name} removed` } });
+    io.emit('rooms:updated', { id: req.params.id, deleted: true });
+    res.json({ message: 'Room removed' });
+});
 // ─── Socket.io ───────────────────────────────────────────────────
 io.on('connection', (socket) => {
     console.log('Dashboard connected:', socket.id);

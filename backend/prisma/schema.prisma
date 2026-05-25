@@ -41,3 +41,22 @@ model AuditLog {
   performedBy String?
   createdAt   DateTime @default(now())
 }
+model Room {
+  id               String   @id @default(uuid())
+  name             String
+  type             String
+  status           String   @default("open")
+  department       String
+  currentPatientId String?
+  createdAt        DateTime @default(now())
+}
+
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       String   @default("nurse")
+  department String?
+  createdAt  DateTime @default(now())
+}

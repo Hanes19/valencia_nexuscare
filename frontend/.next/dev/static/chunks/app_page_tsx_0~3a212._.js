@@ -864,7 +864,7 @@ function NexusDashboard() {
         columnNumber: 5
     }, this);
 }
-_s(NexusDashboard, "yoegqjAZuwQERrS51BqPhVgMK2U=");
+_s(NexusDashboard, "QTIX6PuAwQel5S72np8Ypm67t68=");
 _c1 = NexusDashboard;
 var _c, _c1;
 __turbopack_context__.k.register(_c, "PatientCard");
