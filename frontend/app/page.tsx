@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Users, Activity, Stethoscope, CheckCircle2, AlertTriangle, Clock, Moon, Sun, Settings } from 'lucide-react';
 import { io } from 'socket.io-client';
+import { getUser, getToken, logout, getRoleColumns, getRoleLabel } from './lib/auth';
 
 const socket = io('http://localhost:4000');
 
@@ -28,6 +29,14 @@ type Stats = {
   };
 };
 
+type Room = {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  department: string;
+};
+
 const columns = [
   { id: 'waiting',        title: 'Waiting Room', color: 'bg-slate-500',   icon: Clock },
   { id: 'in-triage',      title: 'Triage',       color: 'bg-blue-500',    icon: Users },
@@ -37,21 +46,38 @@ const columns = [
 ];
 
 const priorityConfig = {
-  red:    { label: 'Code Red', bg: 'bg-red-50 dark:bg-red-950',       border: 'border-red-400',    text: 'text-red-700 dark:text-red-400',    dot: 'bg-red-500' },
-  yellow: { label: 'Urgent',   bg: 'bg-amber-50 dark:bg-amber-950',   border: 'border-amber-400',  text: 'text-amber-700 dark:text-amber-400', dot: 'bg-amber-500' },
-  green:  { label: 'Stable',   bg: 'bg-emerald-50 dark:bg-emerald-950', border: 'border-emerald-400', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  red:    { label: 'Code Red', bg: 'bg-red-50',     border: 'border-red-400',    text: 'text-red-700',    dot: 'bg-red-500' },
+  yellow: { label: 'Urgent',   bg: 'bg-amber-50',   border: 'border-amber-400',  text: 'text-amber-700',  dot: 'bg-amber-500' },
+  green:  { label: 'Stable',   bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-700', dot: 'bg-emerald-500' },
 };
 
-function PatientCard({ patient, onMove, onDischarge }: {
+function PatientCard({ patient, onMove, onDischarge, userRole, rooms }: {
   patient: Patient;
-  onMove: (id: string, status: Status) => void;
+  onMove: (id: string, status: Status, roomId?: string) => void;
   onDischarge: (id: string) => void;
+  userRole: string;
+  rooms: Room[];
 }) {
   const p = priorityConfig[patient.priority];
-  const statusOrder: Status[] = ['waiting', 'in-triage', 'in-diagnostics', 'in-treatment', 'in-discharge'];
-  const currentIndex = statusOrder.indexOf(patient.status);
-  const nextStatus = statusOrder[currentIndex + 1] as Status | undefined;
   const waitMins = Math.floor((Date.now() - new Date(patient.createdAt).getTime()) / 60000);
+  const [showRoomPicker, setShowRoomPicker] = useState<Status | null>(null);
+
+  const departmentForStatus: Record<string, string> = {
+    'in-triage': 'Triage',
+    'in-diagnostics': 'Diagnostics',
+    'in-treatment': 'Treatment',
+    'in-discharge': 'Discharge',
+  };
+
+  const handleMove = (nextStatus: Status) => {
+    const dept = departmentForStatus[nextStatus];
+    const availableRooms = rooms.filter(r => r.department === dept && r.status === 'open');
+    if (availableRooms.length > 0) {
+      setShowRoomPicker(nextStatus);
+    } else {
+      onMove(patient.id, nextStatus);
+    }
+  };
 
   return (
     <div className={`animate-slide-in rounded-xl border-l-4 ${p.border} ${p.bg} p-3 mb-3 shadow-sm hover:shadow-md transition-shadow`}>
@@ -66,28 +92,70 @@ function PatientCard({ patient, onMove, onDischarge }: {
         <Clock size={10} />
         <span>{waitMins}m waiting{waitMins > 30 ? ' ⚠️' : ''}</span>
       </div>
+
+      {/* Room Picker */}
+      {showRoomPicker && (
+        <div className="mb-3 p-2 rounded-lg border animate-slide-in"
+          style={{ background: 'var(--background)', borderColor: 'var(--border)' }}>
+          <p className="text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
+            Assign Room ({departmentForStatus[showRoomPicker]}):
+          </p>
+          <div className="flex flex-wrap gap-1 mb-2">
+            {rooms
+              .filter(r => r.department === departmentForStatus[showRoomPicker] && r.status === 'open')
+              .map(room => (
+                <button key={room.id}
+                  onClick={() => { onMove(patient.id, showRoomPicker, room.id); setShowRoomPicker(null); }}
+                  className="text-xs px-2 py-1 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition">
+                  {room.name}
+                </button>
+              ))}
+            <button
+              onClick={() => { onMove(patient.id, showRoomPicker); setShowRoomPicker(null); }}
+              className="text-xs px-2 py-1 rounded-lg border hover:opacity-70 transition"
+              style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
+              Skip
+            </button>
+          </div>
+          <button onClick={() => setShowRoomPicker(null)}
+            className="text-xs" style={{ color: 'var(--muted)' }}>Cancel</button>
+        </div>
+      )}
+
       <div className="flex gap-2 flex-wrap">
-        {nextStatus && nextStatus !== 'in-discharge' && (
-          <button
-            onClick={() => onMove(patient.id, nextStatus)}
-            className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 hover:bg-slate-50 dark:hover:bg-slate-600 transition font-medium"
-          >
-            Move Forward →
+        {patient.status === 'waiting' && (userRole === 'nurse' || userRole === 'admin' || userRole === 'doctor') && (
+          <button onClick={() => handleMove('in-triage')}
+            className="text-xs bg-blue-500 text-white rounded-lg px-2 py-1 hover:bg-blue-600 transition font-medium">
+            → Send to Triage
           </button>
         )}
-        {patient.status === 'in-treatment' && (
-          <button
-            onClick={() => onMove(patient.id, 'in-discharge')}
-            className="text-xs bg-emerald-500 text-white rounded-lg px-2 py-1 hover:bg-emerald-600 transition font-medium"
-          >
-            Send to Discharge →
+        {patient.status === 'in-triage' && (userRole === 'nurse' || userRole === 'admin' || userRole === 'doctor') && (
+          <>
+            <button onClick={() => handleMove('in-diagnostics')}
+              className="text-xs bg-orange-500 text-white rounded-lg px-2 py-1 hover:bg-orange-600 transition font-medium">
+              🔬 Send to Lab
+            </button>
+            <button onClick={() => handleMove('in-treatment')}
+              className="text-xs bg-rose-500 text-white rounded-lg px-2 py-1 hover:bg-rose-600 transition font-medium">
+              💊 Send to Treatment
+            </button>
+          </>
+        )}
+        {patient.status === 'in-diagnostics' && (userRole === 'lab_tech' || userRole === 'admin' || userRole === 'doctor') && (
+          <button onClick={() => handleMove('in-treatment')}
+            className="text-xs bg-rose-500 text-white rounded-lg px-2 py-1 hover:bg-rose-600 transition font-medium">
+            ✅ Lab Done → Send to Treatment
           </button>
         )}
-        {patient.status === 'in-discharge' && (
-          <button
-            onClick={() => onDischarge(patient.id)}
-            className="text-xs bg-emerald-500 text-white rounded-lg px-2 py-1 hover:bg-emerald-600 transition font-medium"
-          >
+        {patient.status === 'in-treatment' && (userRole === 'doctor' || userRole === 'admin') && (
+          <button onClick={() => handleMove('in-discharge')}
+            className="text-xs bg-emerald-500 text-white rounded-lg px-2 py-1 hover:bg-emerald-600 transition font-medium">
+            → Send to Discharge
+          </button>
+        )}
+        {patient.status === 'in-discharge' && (userRole === 'nurse' || userRole === 'admin' || userRole === 'doctor') && (
+          <button onClick={() => onDischarge(patient.id)}
+            className="text-xs bg-emerald-500 text-white rounded-lg px-2 py-1 hover:bg-emerald-600 transition font-medium">
             ✓ Complete & Discharge
           </button>
         )}
@@ -108,18 +176,24 @@ export default function NexusDashboard() {
   const [form, setForm] = useState({ name: '', priority: 'green', status: 'waiting' });
   const [dark, setDark] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ name: string; role: string; department: string } | null>(null);
+  const [rooms, setRooms] = useState<Room[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const token = getToken();
+    const user = getUser();
+    if (!token || !user) {
       window.location.href = '/login';
+      return;
     }
+    setCurrentUser(user);
   }, []);
 
   const fetchPatients = useCallback(() => {
     fetch('http://localhost:4000/api/patients')
       .then(res => res.json())
-      .then(setPatients)
+      .then(data => { setPatients(data); setDataLoaded(true); })
       .catch(err => console.error('Failed to fetch patients:', err));
   }, []);
 
@@ -130,10 +204,17 @@ export default function NexusDashboard() {
       .catch(err => console.error('Failed to fetch stats:', err));
   }, []);
 
+  const fetchRooms = useCallback(() => {
+  fetch('http://localhost:4000/api/rooms')
+    .then(res => res.json())
+    .then(setRooms)
+    .catch(err => console.error('Failed to fetch rooms:', err));
+}, []);
+
   useEffect(() => {
-    
     fetchPatients();
     fetchStats();
+    fetchRooms();
 
     socket.on('connect', () => setConnected(true));
     socket.on('disconnect', () => setConnected(false));
@@ -155,13 +236,22 @@ export default function NexusDashboard() {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
 
-  const movePatient = async (id: string, status: Status) => {
-    await fetch(`http://localhost:4000/api/patients/${id}`, {
+  const movePatient = async (id: string, status: Status, roomId?: string) => {
+  await fetch(`http://localhost:4000/api/patients/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+
+  if (roomId) {
+    await fetch(`http://localhost:4000/api/rooms/${roomId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status: 'occupied', currentPatientId: id }),
     });
-  };
+    fetchRooms();
+  }
+};
 
   const dischargePatient = async (id: string) => {
     await fetch(`http://localhost:4000/api/patients/${id}`, { method: 'DELETE' });
@@ -178,13 +268,23 @@ export default function NexusDashboard() {
     setShowForm(false);
   };
 
-  const heatmapDepts = [
-    { label: 'Waiting',     count: statsData.byStatus.waiting,       threshold: 5 },
-    { label: 'Triage',      count: statsData.byStatus.inTriage,      threshold: 4 },
-    { label: 'Diagnostics', count: statsData.byStatus.inDiagnostics, threshold: 3 },
-    { label: 'Treatment',   count: statsData.byStatus.inTreatment,   threshold: 3 },
-    { label: 'Discharge',   count: statsData.byStatus.inDischarge,   threshold: 4 },
+  const visibleColumns = columns.filter(col =>
+    currentUser ? getRoleColumns(currentUser.role as any).includes(col.id) : true
+  );
+
+  const allHeatmapDepts = [
+    { label: 'Waiting',     count: statsData.byStatus.waiting,       threshold: 5, id: 'waiting' },
+    { label: 'Triage',      count: statsData.byStatus.inTriage,      threshold: 4, id: 'in-triage' },
+    { label: 'Diagnostics', count: statsData.byStatus.inDiagnostics, threshold: 3, id: 'in-diagnostics' },
+    { label: 'Treatment',   count: statsData.byStatus.inTreatment,   threshold: 3, id: 'in-treatment' },
+    { label: 'Discharge',   count: statsData.byStatus.inDischarge,   threshold: 4, id: 'in-discharge' },
   ];
+
+  const heatmapDepts = allHeatmapDepts.filter(d =>
+    currentUser ? getRoleColumns(currentUser.role as any).includes(d.id) : true
+  );
+
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'doctor';
 
   return (
     <div className="min-h-screen p-4 md:p-6 transition-colors" style={{ background: 'var(--background)' }}>
@@ -203,47 +303,54 @@ export default function NexusDashboard() {
             <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--foreground)' }}>
               NexusCare
             </h1>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${connected ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
-              {connected ? '● Live' : '○ Offline'}
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              connected || dataLoaded ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
+            }`}>
+              {connected || dataLoaded ? '● Live' : '○ Offline'}
             </span>
           </div>
           <p className="text-sm" style={{ color: 'var(--muted)' }}>Hospital Flow Command Center</p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          {currentUser && (
+            <div className="text-xs px-3 py-1.5 rounded-lg border font-medium"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+              👤 {currentUser.name} · {getRoleLabel(currentUser.role as any)}
+            </div>
+          )}
           {statsData.byPriority.red > 0 && (
             <div className="flex items-center gap-1.5 bg-red-100 border border-red-300 text-red-700 px-3 py-1.5 rounded-lg text-sm font-semibold animate-pulse">
               <AlertTriangle size={14} />
               {statsData.byPriority.red} Code Red
             </div>
           )}
-          <div className="text-xs px-3 py-1.5 rounded-lg border font-medium" style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+          <div className="text-xs px-3 py-1.5 rounded-lg border font-medium"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
             {statsData.total} patients
           </div>
-          <a href="/admin" className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium hover:opacity-80 transition"
-            style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-            <Settings size={14} /> Admin
-          </a>
-          <button
-            onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              window.location.href = '/login';
-            }}
+          {isAdmin && (
+            <a href="/admin" className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium hover:opacity-80 transition"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+              <Settings size={14} /> Admin
+            </a>
+          )}
+          <button onClick={() => logout()}
             className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
-            style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}
-          >
+            style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
             Logout
-        </button>
+          </button>
           <button onClick={() => setDark(!dark)}
             className="p-2 rounded-lg border hover:opacity-80 transition"
             style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
             {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
-          <button onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm">
-            + Admit Patient
-          </button>
+          {isAdmin && (
+            <button onClick={() => setShowForm(!showForm)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm">
+              + Admit Patient
+            </button>
+          )}
         </div>
       </header>
 
@@ -274,7 +381,7 @@ export default function NexusDashboard() {
       </div>
 
       {/* Admit Form */}
-      {showForm && (
+      {showForm && isAdmin && (
         <div className="mb-6 rounded-xl border p-4 shadow-sm animate-slide-in flex gap-4 items-end flex-wrap"
           style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
           <div className="flex-1 min-w-40">
@@ -312,9 +419,23 @@ export default function NexusDashboard() {
         </div>
       )}
 
+      {/* Role banner for non-admin */}
+      {currentUser && !isAdmin && (
+        <div className="mb-4 px-4 py-3 rounded-xl border text-sm font-medium"
+          style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+          👁 Viewing as <strong style={{ color: 'var(--foreground)' }}>{getRoleLabel(currentUser.role as any)}</strong>
+          {currentUser.department && ` — ${currentUser.department} Department`}
+        </div>
+      )}
+
       {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {columns.map((col) => {
+      <div className={`grid grid-cols-1 gap-4 ${
+        visibleColumns.length === 1 ? 'md:grid-cols-1 lg:grid-cols-1' :
+        visibleColumns.length === 2 ? 'md:grid-cols-2 lg:grid-cols-2' :
+        visibleColumns.length === 3 ? 'md:grid-cols-3 lg:grid-cols-3' :
+        'md:grid-cols-2 lg:grid-cols-5'
+      }`}>
+        {visibleColumns.map((col) => {
           const Icon = col.icon;
           const colPatients = patients.filter(p => p.status === col.id);
           const isBusy = colPatients.length >= 3;
@@ -342,6 +463,8 @@ export default function NexusDashboard() {
                       patient={patient}
                       onMove={movePatient}
                       onDischarge={dischargePatient}
+                      userRole={currentUser?.role || 'admin'}
+                      rooms={rooms}
                     />
                   ))
                 )}

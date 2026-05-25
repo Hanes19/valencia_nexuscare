@@ -92,30 +92,45 @@ export default function AdminPanel() {
   const [dark, setDark] = useState(false);
 
 
-  useEffect(() => {
+useEffect(() => {
   const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (!token) {
+  const raw = localStorage.getItem('user');
+  if (!token || !raw) {
     window.location.href = '/login';
     return;
   }
-  if (user.role !== 'admin') {
-    window.location.href = '/';
+  try {
+    const user = JSON.parse(raw);
+    if (user.role !== 'admin') {
+      window.location.href = '/';
+    }
+  } catch {
+    window.location.href = '/login';
   }
-  }, []);
+}, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
 
   const fetchAll = () => {
-  fetch(`${API}/api/staff`).then(r => r.json()).then(setStaff).catch(console.error);
-  fetch(`${API}/api/departments`).then(r => r.json()).then(setDepartments).catch(console.error);
-  fetch(`${API}/api/logs`).then(r => r.json()).then(setLogs).catch(console.error);
-  fetch(`${API}/api/analytics`).then(r => r.json()).then(setAnalytics).catch(console.error);
-  fetch(`${API}/api/rooms`).then(r => r.json()).then(setRooms).catch(console.error);
-};
-  useEffect(() => { fetchAll(); }, []);
+    fetch(`${API}/api/staff`)
+      .then(r => { if (!r.ok) throw new Error(`staff: ${r.status}`); return r.json(); })
+      .then(setStaff).catch(console.error);
+    fetch(`${API}/api/departments`)
+      .then(r => { if (!r.ok) throw new Error(`departments: ${r.status}`); return r.json(); })
+      .then(setDepartments).catch(console.error);
+    fetch(`${API}/api/logs`)
+      .then(r => { if (!r.ok) throw new Error(`logs: ${r.status}`); return r.json(); })
+      .then(setLogs).catch(console.error);
+    fetch(`${API}/api/analytics`)
+      .then(r => { if (!r.ok) throw new Error(`analytics: ${r.status}`); return r.json(); })
+      .then(setAnalytics).catch(console.error);
+    fetch(`${API}/api/rooms`)
+      .then(r => { if (!r.ok) throw new Error(`rooms: ${r.status}`); return r.json(); })
+      .then(setRooms).catch(console.error);
+  };
+    useEffect(() => { fetchAll(); }, []);
 
   const addStaff = async () => {
     if (!staffForm.name || !staffForm.email) return;

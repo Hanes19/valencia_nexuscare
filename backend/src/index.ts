@@ -10,7 +10,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'nexuscare-secret-key';
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const adapter = new PrismaPg({ 
+  connectionString: process.env.DATABASE_URL!,
+});
 const prisma = new PrismaClient({ adapter });
 const app = express();
 const server = createServer(app);
