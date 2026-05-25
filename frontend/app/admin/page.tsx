@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Users, Building2, ScrollText, BarChart3, Plus, Trash2, Edit2, X, Check, Moon, Sun, ArrowLeft, BedDouble } from 'lucide-react';
+import { Users, Building2, ScrollText, BarChart3, Plus, Trash2, Edit2, X, Check, Moon, Sun, ArrowLeft, BedDouble, UserCheck, Settings } from 'lucide-react';
 
 type Staff = {
   id: string;
@@ -37,6 +37,23 @@ type Room = {
   currentPatientId: string | null;
 };
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string | null;
+  createdAt: string;
+};
+
+type Setting = {
+  id: string;
+  key: string;
+  value: string;
+  description: string | null;
+  updatedAt: string;
+};
+
 type Analytics = {
   totalPatients: number;
   totalStaff: number;
@@ -54,11 +71,15 @@ type Analytics = {
 
 const API = 'http://localhost:4000';
 
+
+
 const tabs = [
   { id: 'analytics',   label: 'Overview',    icon: BarChart3 },
   { id: 'staff',       label: 'Staff',        icon: Users },
   { id: 'departments', label: 'Departments',  icon: Building2 },
   { id: 'rooms',       label: 'Rooms',        icon: BedDouble },
+  { id: 'users',       label: 'Users',        icon: UserCheck },
+  { id: 'settings',    label: 'Queue Engine', icon: Settings },
   { id: 'logs',        label: 'Audit Log',    icon: ScrollText },
 ];
 
@@ -176,6 +197,10 @@ export default function AdminPanel() {
   const [dark, setDark] = useState(false);
   const [roomFilter, setRoomFilter] = useState('all');
   const [roomSearch, setRoomSearch] = useState('');
+  const [users, setUsers] = useState<User[]>([]);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [settings, setSettings] = useState<Setting[]>([]);
+  const [editingSettings, setEditingSettings] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -197,6 +222,13 @@ export default function AdminPanel() {
     fetch(`${API}/api/logs`).then(r => r.json()).then(setLogs).catch(console.error);
     fetch(`${API}/api/analytics`).then(r => r.json()).then(setAnalytics).catch(console.error);
     fetch(`${API}/api/rooms`).then(r => r.json()).then(setRooms).catch(console.error);
+    fetch(`${API}/api/users`).then(r => r.json()).then(setUsers).catch(console.error);
+    fetch(`${API}/api/settings`).then(r => r.json()).then((data: Setting[]) => {
+  setSettings(data);
+  const map: Record<string, string> = {};
+  data.forEach(s => { map[s.key] = s.value; });
+  setEditingSettings(map);
+}).catch(console.error);
   };
 
   useEffect(() => { fetchAll(); }, []);
@@ -267,14 +299,39 @@ export default function AdminPanel() {
     fetchAll();
   };
 
-  const filteredRooms = rooms
-    .filter(r => roomFilter === 'all' || r.status === roomFilter)
-    .filter(r =>
-      roomSearch === '' ||
-      r.name.toLowerCase().includes(roomSearch.toLowerCase()) ||
-      r.department.toLowerCase().includes(roomSearch.toLowerCase()) ||
-      (roomTypeLabels[r.type] ?? r.type).toLowerCase().includes(roomSearch.toLowerCase())
-    )
+  const updateUser = async () => {
+  if (!editingUser) return;
+  await fetch(`${API}/api/users/${editingUser.id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role: editingUser.role, department: editingUser.department }),
+  });
+  setEditingUser(null);
+  fetchAll();
+};
+
+const deleteUser = async (id: string) => {
+  await fetch(`${API}/api/users/${id}`, { method: 'DELETE' });
+  fetchAll();
+};
+
+const saveSetting = async (key: string) => {
+  await fetch(`${API}/api/settings/${key}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ value: editingSettings[key] }),
+  });
+  fetchAll();
+};
+
+const filteredRooms = rooms
+  .filter(r => roomFilter === 'all' || r.status === roomFilter)
+  .filter(r =>
+    roomSearch === '' ||
+    r.name.toLowerCase().includes(roomSearch.toLowerCase()) ||
+    r.department.toLowerCase().includes(roomSearch.toLowerCase()) ||
+    (roomTypeLabels[r.type] ?? r.type).toLowerCase().includes(roomSearch.toLowerCase())
+  )
     .sort((a, b) => {
       const order = { open: 0, cleaning: 1, occupied: 2 };
       return (order[a.status as keyof typeof order] ?? 3) - (order[b.status as keyof typeof order] ?? 3);
@@ -730,6 +787,180 @@ export default function AdminPanel() {
             </div>
           </div>
         )}
+
+        {/* ── USERS TAB ── */}
+{activeTab === 'users' && (
+  <div className="space-y-4 animate-fade-in">
+    <div className="flex justify-between items-center">
+      <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
+        Registered Users <span className="text-sm font-normal" style={{ color: 'var(--muted)' }}>({users.length})</span>
+      </h2>
+    </div>
+
+    <div className="rounded-xl border shadow-sm overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+      <table className="w-full text-sm">
+        <thead className="border-b" style={{ background: 'var(--background)', borderColor: 'var(--border)' }}>
+          <tr>
+            {['Name', 'Email', 'Role', 'Department', 'Registered', 'Actions'].map(h => (
+              <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase" style={{ color: 'var(--muted)' }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody style={{ background: 'var(--card)' }}>
+          {users.map(u => (
+            <tr key={u.id} className="border-b hover:opacity-90 transition" style={{ borderColor: 'var(--border)' }}>
+              <td className="px-4 py-3 font-medium" style={{ color: 'var(--foreground)' }}>{u.name}</td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--muted)' }}>{u.email}</td>
+              <td className="px-4 py-3">
+                {editingUser?.id === u.id ? (
+                  <select className="border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    value={editingUser.role}
+                    onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}>
+                    <option value="nurse">Nurse</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="lab_tech">Lab Tech</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                ) : (
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${roleColors[u.role] ?? 'bg-gray-100 text-gray-600'}`}>
+                    {u.role.replace('_', ' ')}
+                  </span>
+                )}
+              </td>
+              <td className="px-4 py-3 text-sm" style={{ color: 'var(--foreground)' }}>
+                {editingUser?.id === u.id ? (
+                  <select className="border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    value={editingUser.department ?? ''}
+                    onChange={e => setEditingUser({ ...editingUser, department: e.target.value })}>
+                    {Object.keys(departmentTypeMap).map(d => <option key={d}>{d}</option>)}
+                  </select>
+                ) : (
+                  u.department ?? '—'
+                )}
+              </td>
+              <td className="px-4 py-3 text-xs" style={{ color: 'var(--muted)' }}>
+                {new Date(u.createdAt).toLocaleDateString()}
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  {editingUser?.id === u.id ? (
+                    <>
+                      <button onClick={updateUser} className="text-emerald-600 hover:text-emerald-800 transition"><Check size={15} /></button>
+                      <button onClick={() => setEditingUser(null)} className="hover:opacity-70 transition" style={{ color: 'var(--muted)' }}><X size={15} /></button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => setEditingUser(u)} className="text-blue-500 hover:text-blue-700 transition"><Edit2 size={15} /></button>
+                      <button onClick={() => deleteUser(u.id)} className="text-red-400 hover:text-red-600 transition"><Trash2 size={15} /></button>
+                    </>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+          {users.length === 0 && (
+            <tr><td colSpan={6} className="px-4 py-10 text-center text-sm italic" style={{ color: 'var(--muted)' }}>No users registered yet</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
+  {/* ── SETTINGS TAB ── */}
+{activeTab === 'settings' && (
+  <div className="space-y-6 animate-fade-in">
+    <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
+      Queue Engine Settings
+    </h2>
+
+    {/* Capacity Settings */}
+    <div className="rounded-xl border p-6 shadow-sm" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+      <h3 className="font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Department Capacities</h3>
+      <p className="text-xs mb-4" style={{ color: 'var(--muted)' }}>Maximum patients allowed in each department at once</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {settings.filter(s => s.key.includes('capacity')).map(s => (
+          <div key={s.key} className="rounded-lg border p-4" style={{ borderColor: 'var(--border)' }}>
+            <label className="text-xs font-semibold block mb-1" style={{ color: 'var(--foreground)' }}>
+              {s.description}
+            </label>
+            <div className="flex gap-2 items-center mt-2">
+              <input type="number" min={1} max={50}
+                className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                value={editingSettings[s.key] ?? s.value}
+                onChange={e => setEditingSettings({ ...editingSettings, [s.key]: e.target.value })}
+              />
+              <button onClick={() => saveSetting(s.key)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition">
+                Save
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* DMT Priority Settings */}
+    <div className="rounded-xl border p-6 shadow-sm" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+      <h3 className="font-semibold mb-1" style={{ color: 'var(--foreground)' }}>DMT Priority Rules</h3>
+      <p className="text-xs mb-4" style={{ color: 'var(--muted)' }}>Configure auto-escalation thresholds and Code Red behavior</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {settings.filter(s => ['auto_escalate_yellow', 'auto_escalate_red', 'max_wait_minutes', 'cleaning_duration'].includes(s.key)).map(s => (
+          <div key={s.key} className="rounded-lg border p-4" style={{ borderColor: 'var(--border)' }}>
+            <label className="text-xs font-semibold block mb-1" style={{ color: 'var(--foreground)' }}>
+              {s.description}
+            </label>
+            <div className="flex gap-2 items-center mt-2">
+              <input type="number" min={1}
+                className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                value={editingSettings[s.key] ?? s.value}
+                onChange={e => setEditingSettings({ ...editingSettings, [s.key]: e.target.value })}
+              />
+              <button onClick={() => saveSetting(s.key)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition">
+                Save
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Code Red Override Toggle */}
+    <div className="rounded-xl border p-6 shadow-sm" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+      <h3 className="font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Code Red Override</h3>
+      <p className="text-xs mb-4" style={{ color: 'var(--muted)' }}>When enabled, Code Red patients automatically skip the queue</p>
+      {settings.filter(s => s.key === 'code_red_override').map(s => (
+        <div key={s.key} className="flex items-center gap-4">
+          <button
+          onClick={() => {
+            const newVal = editingSettings[s.key] === 'true' ? 'false' : 'true';
+            setEditingSettings({ ...editingSettings, [s.key]: newVal });
+            fetch(`${API}/api/settings/${s.key}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ value: newVal }),
+            }).then(() => fetchAll());
+          }}
+          className={`relative inline-flex w-12 h-6 rounded-full transition-colors flex-shrink-0 ${
+            editingSettings[s.key] === 'true' ? 'bg-emerald-500' : 'bg-slate-300'
+          }`}>
+          <span className={`inline-block top-1 mt-1 ml-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+            editingSettings[s.key] === 'true' ? 'translate-x-6' : 'translate-x-0'
+          }`} />
+        </button>
+          <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+            {editingSettings[s.key] === 'true' ? 'Enabled' : 'Disabled'}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* ── AUDIT LOG TAB ── */}
         {activeTab === 'logs' && (

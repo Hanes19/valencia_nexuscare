@@ -60,3 +60,11 @@ model User {
   department String?
   createdAt  DateTime @default(now())
 }
+
+model Setting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @default(now())
+}

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Activity, Stethoscope, CheckCircle2, AlertTriangle, Clock, Moon, Sun, Settings } from 'lucide-react';
+import { Users, Activity, Stethoscope, CheckCircle2, AlertTriangle, Clock, Moon, Sun, Settings, X } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { getUser, getToken, logout, getRoleColumns, getRoleLabel } from './lib/auth';
 
@@ -35,6 +35,7 @@ type Room = {
   type: string;
   status: string;
   department: string;
+  currentPatientId: string | null;
 };
 
 const columns = [
@@ -51,12 +52,93 @@ const priorityConfig = {
   green:  { label: 'Stable',   bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-700', dot: 'bg-emerald-500' },
 };
 
-function PatientCard({ patient, onMove, onDischarge, userRole, rooms }: {
+function PatientModal({ patient, rooms, onClose }: {
+  patient: Patient;
+  rooms: Room[];
+  onClose: () => void;
+}) {
+  const p = priorityConfig[patient.priority];
+  const waitMins = Math.floor((Date.now() - new Date(patient.createdAt).getTime()) / 60000);
+  const assignedRoom = rooms.find(r => r.currentPatientId === patient.id);
+
+  const statusLabels: Record<string, string> = {
+    'waiting': 'Waiting Room',
+    'in-triage': 'Triage',
+    'in-diagnostics': 'Diagnostics',
+    'in-treatment': 'Treatment',
+    'in-discharge': 'Discharge',
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.5)' }}
+      onClick={onClose}>
+      <div className="rounded-2xl border shadow-2xl w-full max-w-md animate-slide-in"
+        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+        onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className={`p-5 rounded-t-2xl border-l-4 ${p.border} ${p.bg}`}>
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>{patient.name}</h2>
+              <span className={`flex items-center gap-1.5 text-xs font-bold mt-1 ${p.text}`}>
+                <span className={`w-2 h-2 rounded-full ${p.dot}`} />
+                {p.label}
+              </span>
+            </div>
+            <button onClick={onClose} className="hover:opacity-70 transition" style={{ color: 'var(--muted)' }}>
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="p-5 space-y-4">
+          {[
+            { label: 'Current Status', value: statusLabels[patient.status] ?? patient.status },
+            { label: 'Time Waiting',   value: `${waitMins} minutes${waitMins > 30 ? ' ⚠️ Over threshold' : ''}` },
+            { label: 'Admitted At',    value: new Date(patient.createdAt).toLocaleString() },
+            { label: 'Patient ID',     value: patient.id.slice(0, 8).toUpperCase() },
+          ].map(item => (
+            <div key={item.label} className="flex justify-between items-center py-2 border-b"
+              style={{ borderColor: 'var(--border)' }}>
+              <span className="text-sm" style={{ color: 'var(--muted)' }}>{item.label}</span>
+              <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{item.value}</span>
+            </div>
+          ))}
+
+          {/* Room Assignment */}
+          <div className="flex justify-between items-center py-2 border-b" style={{ borderColor: 'var(--border)' }}>
+            <span className="text-sm" style={{ color: 'var(--muted)' }}>Assigned Room</span>
+            {assignedRoom ? (
+              <span className="text-sm font-semibold text-emerald-600">{assignedRoom.name}</span>
+            ) : (
+              <span className="text-sm italic" style={{ color: 'var(--muted)' }}>No room assigned</span>
+            )}
+          </div>
+
+          {/* Priority indicator */}
+          <div className={`rounded-xl p-4 ${p.bg} border ${p.border}`}>
+            <p className={`text-xs font-semibold ${p.text}`}>
+              {patient.priority === 'red' && '🚨 Code Red — Immediate attention required'}
+              {patient.priority === 'yellow' && '⚠️ Urgent — Requires prompt attention'}
+              {patient.priority === 'green' && '✅ Stable — Standard queue priority'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PatientCard({ patient, onMove, onDischarge, userRole, rooms, onSelect }: {
   patient: Patient;
   onMove: (id: string, status: Status, roomId?: string) => void;
   onDischarge: (id: string) => void;
   userRole: string;
   rooms: Room[];
+  onSelect: (patient: Patient) => void;
 }) {
   const p = priorityConfig[patient.priority];
   const waitMins = Math.floor((Date.now() - new Date(patient.createdAt).getTime()) / 60000);
@@ -68,6 +150,7 @@ function PatientCard({ patient, onMove, onDischarge, userRole, rooms }: {
     'in-treatment': 'Treatment',
     'in-discharge': 'Discharge',
   };
+
 
   const handleMove = (nextStatus: Status) => {
     const dept = departmentForStatus[nextStatus];
@@ -82,7 +165,12 @@ function PatientCard({ patient, onMove, onDischarge, userRole, rooms }: {
   return (
     <div className={`animate-slide-in rounded-xl border-l-4 ${p.border} ${p.bg} p-3 mb-3 shadow-sm hover:shadow-md transition-shadow`}>
       <div className="flex items-center justify-between mb-1">
-        <span className="font-semibold text-sm" style={{ color: 'var(--foreground)' }}>{patient.name}</span>
+        <button
+          onClick={() => onSelect(patient)}
+          className="font-semibold text-sm text-left hover:underline transition"
+          style={{ color: 'var(--foreground)' }}>
+          {patient.name}
+        </button>
         <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border ${p.border} ${p.text}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${p.dot}`} />
           {p.label}
@@ -179,6 +267,7 @@ export default function NexusDashboard() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ name: string; role: string; department: string } | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   useEffect(() => {
     const token = getToken();
@@ -204,11 +293,20 @@ export default function NexusDashboard() {
       .catch(err => console.error('Failed to fetch stats:', err));
   }, []);
 
-  const fetchRooms = useCallback(() => {
+const fetchRooms = useCallback(() => {
   fetch('http://localhost:4000/api/rooms')
-    .then(res => res.json())
+    .then(r => { if (!r.ok) throw new Error(`rooms: ${r.status}`); return r.json(); })
     .then(setRooms)
-    .catch(err => console.error('Failed to fetch rooms:', err));
+    .catch(err => {
+      console.error('Failed to fetch rooms:', err);
+      // Retry after 3 seconds on failure
+      setTimeout(() => {
+        fetch('http://localhost:4000/api/rooms')
+          .then(r => r.json())
+          .then(setRooms)
+          .catch(console.error);
+      }, 3000);
+    });
 }, []);
 
   useEffect(() => {
@@ -222,6 +320,12 @@ export default function NexusDashboard() {
     socket.on('queue:emergency', ({ patient, message }: { patient: Patient; message: string }) => {
       setCodeRed(`🚨 ${message}: ${patient.name}`);
       setTimeout(() => setCodeRed(null), 6000);
+    socket.on('queue:alert', ({ patientId, message }: { patientId: string; message: string }) => {
+  console.warn('⚠️ Wait alert:', message);
+  // Flash a warning - reuse the codeRed banner but in amber
+  setCodeRed(`⚠️ ${message}`);
+  setTimeout(() => setCodeRed(null), 5000);
+});
     });
 
     return () => {
@@ -229,6 +333,7 @@ export default function NexusDashboard() {
       socket.off('disconnect');
       socket.off('queue:updated');
       socket.off('queue:emergency');
+      socket.off('queue:alert');
     };
   }, [fetchPatients, fetchStats]);
 
@@ -253,9 +358,30 @@ export default function NexusDashboard() {
   }
 };
 
-  const dischargePatient = async (id: string) => {
-    await fetch(`http://localhost:4000/api/patients/${id}`, { method: 'DELETE' });
-  };
+const dischargePatient = async (id: string) => {
+  const res = await fetch(`http://localhost:4000/api/patients/${id}`, { method: 'DELETE' });
+  if (!res.ok) return;
+
+  const assignedRoom = rooms.find(r => r.currentPatientId === id);
+  if (assignedRoom) {
+    await fetch(`http://localhost:4000/api/rooms/${assignedRoom.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'cleaning', currentPatientId: null }),
+    });
+
+    fetchRooms();
+
+    setTimeout(async () => {
+      await fetch(`http://localhost:4000/api/rooms/${assignedRoom.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'open' }),
+      });
+      fetchRooms();
+    }, 30000);
+  }
+};
 
   const admitPatient = async () => {
     if (!form.name.trim()) return;
@@ -289,12 +415,21 @@ export default function NexusDashboard() {
   return (
     <div className="min-h-screen p-4 md:p-6 transition-colors" style={{ background: 'var(--background)' }}>
 
-      {/* Code Red Banner */}
-      {codeRed && (
-        <div className="fixed top-0 left-0 right-0 z-50 animate-pulse-red text-white text-center py-3 font-bold text-base shadow-lg">
-          {codeRed}
-        </div>
-      )}
+        {/* Code Red Banner */}
+        {codeRed && (
+          <div className="fixed top-0 left-0 right-0 z-50 animate-pulse-red text-white text-center py-3 font-bold text-base shadow-lg">
+            {codeRed}
+          </div>
+        )}
+
+        {/* Patient Detail Modal */}
+        {selectedPatient && (
+          <PatientModal
+            patient={selectedPatient}
+            rooms={rooms}
+            onClose={() => setSelectedPatient(null)}
+          />
+        )}
 
       {/* Header */}
       <header className="mb-6 flex items-center justify-between gap-4 flex-wrap">
@@ -465,6 +600,7 @@ export default function NexusDashboard() {
                       onDischarge={dischargePatient}
                       userRole={currentUser?.role || 'admin'}
                       rooms={rooms}
+                      onSelect={setSelectedPatient}
                     />
                   ))
                 )}

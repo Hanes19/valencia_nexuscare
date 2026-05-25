@@ -109,10 +109,27 @@ app.delete('/api/patients/:id', async (req, res) => {
     });
     if (!existing) return res.status(404).json({ error: 'Patient not found' });
 
-    await prisma.patient.delete({ where: { id: req.params.id } });
+    // Clear any room assigned to this patient
+    const assignedRoom = await prisma.room.findFirst({
+        where: { currentPatientId: req.params.id }
+    });
+    if (assignedRoom) {
+        await prisma.room.update({
+            where: { id: assignedRoom.id },
+            data: { status: 'cleaning', currentPatientId: null }
+        });
+        await prisma.auditLog.create({ data: { action: 'UPDATED', entity: 'Room', entityId: assignedRoom.id, details: `${assignedRoom.name} set to cleaning after discharge` } });
+    }
+
+    try {
+        await prisma.patient.delete({ where: { id: req.params.id } });
+    } catch {
+        return res.status(404).json({ error: 'Patient already deleted' });
+    }
 
     io.emit('queue:updated', { action: 'deleted', patientId: req.params.id });
-    res.json({ message: 'Patient removed from queue' });
+    if (assignedRoom) io.emit('rooms:updated', { id: assignedRoom.id, status: 'cleaning' });
+    res.json({ message: 'Patient discharged and room set to cleaning' });
 });
 
 // ─── GET queue stats (for the heatmap dashboard) ─────────────────
@@ -323,6 +340,138 @@ app.get('/api/analytics', async (req, res) => {
         recentActivity: logs,
     });
 });
+
+// ─── USER MANAGEMENT ROUTES ──────────────────────────────────────
+app.get('/api/users', async (req, res) => {
+    const users = await prisma.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, name: true, email: true, role: true, department: true, createdAt: true }
+    });
+    res.json(users);
+});
+
+app.patch('/api/users/:id', async (req, res) => {
+    const { role, department } = req.body;
+    const user = await prisma.user.update({
+        where: { id: req.params.id },
+        data: { ...(role && { role }), ...(department && { department }) },
+        select: { id: true, name: true, email: true, role: true, department: true, createdAt: true }
+    });
+    await prisma.auditLog.create({ data: { action: 'UPDATED', entity: 'User', entityId: user.id, details: `${user.name} role updated to ${role}` } });
+    res.json(user);
+});
+
+app.delete('/api/users/:id', async (req, res) => {
+    const user = await prisma.user.findUnique({ where: { id: req.params.id } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    await prisma.user.delete({ where: { id: req.params.id } });
+    await prisma.auditLog.create({ data: { action: 'DELETED', entity: 'User', entityId: req.params.id, details: `${user.name} account deleted` } });
+    res.json({ message: 'User deleted' });
+});
+
+
+// ─── SETTINGS ROUTES ─────────────────────────────────────────────
+app.get('/api/settings', async (req, res) => {
+    const settings = await prisma.setting.findMany();
+    res.json(settings);
+});
+
+app.patch('/api/settings/:key', async (req, res) => {
+    const { value } = req.body;
+    if (!value) return res.status(400).json({ error: 'value is required' });
+    const setting = await prisma.setting.update({
+        where: { key: req.params.key },
+        data: { value, updatedAt: new Date() }
+    });
+    await prisma.auditLog.create({ data: { action: 'UPDATED', entity: 'Setting', entityId: setting.id, details: `${req.params.key} changed to ${value}` } });
+    io.emit('settings:updated', setting);
+    res.json(setting);
+});
+
+// ─── AUTO-ESCALATION ENGINE ──────────────────────────────────────
+const runEscalationEngine = async () => {
+    try {
+        // Get current settings
+        const settings = await prisma.setting.findMany();
+        const getSetting = (key: string, fallback: number) => {
+            const s = settings.find(s => s.key === key);
+            return s ? parseInt(s.value) : fallback;
+        };
+
+        const escalateYellowAfter = getSetting('auto_escalate_yellow', 30);
+        const escalateRedAfter = getSetting('auto_escalate_red', 45);
+        const maxWaitMinutes = getSetting('max_wait_minutes', 60);
+        const codeRedOverride = settings.find(s => s.key === 'code_red_override')?.value === 'true';
+
+        const patients = await prisma.patient.findMany();
+        const now = Date.now();
+
+        for (const patient of patients) {
+            const waitMins = Math.floor((now - new Date(patient.createdAt).getTime()) / 60000);
+
+            // Escalate green → yellow
+            if (patient.priority === 'green' && waitMins >= escalateYellowAfter) {
+                await prisma.patient.update({
+                    where: { id: patient.id },
+                    data: { priority: 'yellow' }
+                });
+                await prisma.auditLog.create({ data: { 
+                    action: 'UPDATED', entity: 'Patient', entityId: patient.id, 
+                    details: `${patient.name} auto-escalated to Urgent after ${waitMins}m wait` 
+                }});
+                io.emit('queue:updated', { action: 'escalated', patientId: patient.id, newPriority: 'yellow' });
+                console.log(`⬆️ ${patient.name} escalated to Urgent (${waitMins}m wait)`);
+            }
+
+            // Escalate yellow → red
+            else if (patient.priority === 'yellow' && waitMins >= escalateRedAfter) {
+                await prisma.patient.update({
+                    where: { id: patient.id },
+                    data: { priority: 'red' }
+                });
+                await prisma.auditLog.create({ data: { 
+                    action: 'UPDATED', entity: 'Patient', entityId: patient.id, 
+                    details: `${patient.name} auto-escalated to Code Red after ${waitMins}m wait` 
+                }});
+                io.emit('queue:emergency', { 
+                    patient: { ...patient, priority: 'red' }, 
+                    message: 'Auto-escalated to Code Red' 
+                });
+                io.emit('queue:updated', { action: 'escalated', patientId: patient.id, newPriority: 'red' });
+                console.log(`🚨 ${patient.name} escalated to Code Red (${waitMins}m wait)`);
+            }
+
+            // Code Red override — skip queue to triage
+            else if (patient.priority === 'red' && patient.status === 'waiting' && codeRedOverride) {
+                await prisma.patient.update({
+                    where: { id: patient.id },
+                    data: { status: 'in-triage' }
+                });
+                await prisma.auditLog.create({ data: { 
+                    action: 'UPDATED', entity: 'Patient', entityId: patient.id, 
+                    details: `${patient.name} auto-moved to Triage (Code Red override)` 
+                }});
+                io.emit('queue:updated', { action: 'override', patientId: patient.id });
+                console.log(`🚨 ${patient.name} moved to Triage via Code Red override`);
+            }
+
+            // Max wait alert
+            if (waitMins >= maxWaitMinutes) {
+                io.emit('queue:alert', { 
+                    patientId: patient.id, 
+                    message: `${patient.name} has been waiting ${waitMins} minutes!` 
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Escalation engine error:', err);
+    }
+};
+
+// Run every 60 seconds
+setInterval(runEscalationEngine, 60000);
+console.log('⚙️ Auto-escalation engine started');
+
 // ─── Socket.io ───────────────────────────────────────────────────
 io.on('connection', (socket) => {
     console.log('Dashboard connected:', socket.id);
