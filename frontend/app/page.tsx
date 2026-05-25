@@ -109,6 +109,13 @@ export default function NexusDashboard() {
   const [dark, setDark] = useState(false);
   const [connected, setConnected] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    }
+  }, []);
+
   const fetchPatients = useCallback(() => {
     fetch('http://localhost:4000/api/patients')
       .then(res => res.json())
@@ -124,6 +131,7 @@ export default function NexusDashboard() {
   }, []);
 
   useEffect(() => {
+    
     fetchPatients();
     fetchStats();
 
@@ -216,6 +224,17 @@ export default function NexusDashboard() {
             style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
             <Settings size={14} /> Admin
           </a>
+          <button
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              window.location.href = '/login';
+            }}
+            className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}
+          >
+            Logout
+        </button>
           <button onClick={() => setDark(!dark)}
             className="p-2 rounded-lg border hover:opacity-80 transition"
             style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>

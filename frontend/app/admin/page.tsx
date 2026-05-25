@@ -91,16 +91,29 @@ export default function AdminPanel() {
   const [roomForm, setRoomForm] = useState({ name: '', type: 'triage', department: 'Triage' });
   const [dark, setDark] = useState(false);
 
+
+  useEffect(() => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (!token) {
+    window.location.href = '/login';
+    return;
+  }
+  if (user.role !== 'admin') {
+    window.location.href = '/';
+  }
+  }, []);
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
 
   const fetchAll = () => {
-  fetch(`${API}/api/staff`).then(r => r.json()).then(setStaff);
-  fetch(`${API}/api/departments`).then(r => r.json()).then(setDepartments);
-  fetch(`${API}/api/logs`).then(r => r.json()).then(setLogs);
-  fetch(`${API}/api/analytics`).then(r => r.json()).then(setAnalytics);
-  fetch(`${API}/api/rooms`).then(r => r.json()).then(setRooms);
+  fetch(`${API}/api/staff`).then(r => r.json()).then(setStaff).catch(console.error);
+  fetch(`${API}/api/departments`).then(r => r.json()).then(setDepartments).catch(console.error);
+  fetch(`${API}/api/logs`).then(r => r.json()).then(setLogs).catch(console.error);
+  fetch(`${API}/api/analytics`).then(r => r.json()).then(setAnalytics).catch(console.error);
+  fetch(`${API}/api/rooms`).then(r => r.json()).then(setRooms).catch(console.error);
 };
   useEffect(() => { fetchAll(); }, []);
 
@@ -175,29 +188,44 @@ const deleteRoom = async (id: string) => {
   fetchAll();
 };
 
+
+
   return (
     <div className="min-h-screen transition-colors" style={{ background: 'var(--background)' }}>
 
       {/* Header */}
       <header className="border-b px-6 py-4 flex items-center justify-between"
-        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-        <div className="flex items-center gap-4">
-          <a href="/" className="flex items-center gap-1.5 text-sm hover:opacity-70 transition"
-            style={{ color: 'var(--muted)' }}>
-            <ArrowLeft size={16} /> Dashboard
-          </a>
-          <div className="w-px h-5" style={{ background: 'var(--border)' }} />
-          <div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>NexusCare Admin</h1>
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>System Management Panel</p>
-          </div>
-        </div>
-        <button onClick={() => setDark(!dark)}
-          className="p-2 rounded-lg border hover:opacity-80 transition"
-          style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-          {dark ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-      </header>
+  style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+  <div className="flex items-center gap-4">
+    <a href="/" className="flex items-center gap-1.5 text-sm hover:opacity-70 transition"
+      style={{ color: 'var(--muted)' }}>
+      <ArrowLeft size={16} /> Dashboard
+    </a>
+    <div className="w-px h-5" style={{ background: 'var(--border)' }} />
+    <div>
+      <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>NexusCare Admin</h1>
+      <p className="text-xs" style={{ color: 'var(--muted)' }}>System Management Panel</p>
+    </div>
+  </div>
+  <div className="flex items-center gap-2">
+    <button onClick={() => setDark(!dark)}
+      className="p-2 rounded-lg border hover:opacity-80 transition"
+      style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+      {dark ? <Sun size={16} /> : <Moon size={16} />}
+    </button>
+    <button
+      onClick={() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }}
+      className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
+      style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+      Logout
+    </button>
+  </div>
+</header>
+      
 
       {/* Tabs */}
       <div className="border-b px-6" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>

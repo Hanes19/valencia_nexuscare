@@ -6,7 +6,10 @@ import { Server } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import cors from 'cors';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'nexuscare-secret-key';
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 const app = express();
@@ -174,6 +177,149 @@ app.delete('/api/rooms/:id', async (req, res) => {
     await prisma.auditLog.create({ data: { action: 'DELETED', entity: 'Room', entityId: req.params.id, details: `${room.name} removed` } });
     io.emit('rooms:updated', { id: req.params.id, deleted: true });
     res.json({ message: 'Room removed' });
+});
+
+// ─── AUTH ROUTES ─────────────────────────────────────────────────
+app.post('/api/auth/register', async (req, res) => {
+    const { name, email, password, role, department } = req.body;
+    if (!name || !email || !password) {
+        return res.status(400).json({ error: 'name, email and password are required' });
+    }
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) return res.status(400).json({ error: 'Email already registered' });
+    const hashed = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+        data: { name, email, password: hashed, role: role || 'nurse', department }
+    });
+    await prisma.auditLog.create({ data: { action: 'CREATED', entity: 'User', entityId: user.id, details: `${name} registered as ${role}` } });
+    const token = jwt.sign({ id: user.id, role: user.role, department: user.department }, JWT_SECRET, { expiresIn: '8h' });
+    res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, department: user.department } });
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(401).json({ error: 'Invalid email or password' });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: 'Invalid email or password' });
+    await prisma.auditLog.create({ data: { action: 'UPDATED', entity: 'User', entityId: user.id, details: `${user.name} logged in` } });
+    const token = jwt.sign({ id: user.id, role: user.role, department: user.department }, JWT_SECRET, { expiresIn: '8h' });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, department: user.department } });
+});
+
+app.get('/api/auth/me', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+    try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ id: user.id, name: user.name, email: user.email, role: user.role, department: user.department });
+    } catch {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+});
+
+// ─── STAFF ROUTES ────────────────────────────────────────────────
+app.get('/api/staff', async (req, res) => {
+    const staff = await prisma.staff.findMany({ orderBy: { createdAt: 'desc' } });
+    res.json(staff);
+});
+
+app.post('/api/staff', async (req, res) => {
+    const { name, email, role, department } = req.body;
+    if (!name || !email || !role || !department) {
+        return res.status(400).json({ error: 'name, email, role, and department are required' });
+    }
+    const staff = await prisma.staff.create({ data: { name, email, role, department } });
+    await prisma.auditLog.create({ data: { action: 'CREATED', entity: 'Staff', entityId: staff.id, details: `${name} added as ${role}` } });
+    res.status(201).json(staff);
+});
+
+app.patch('/api/staff/:id', async (req, res) => {
+    const { name, email, role, department, status } = req.body;
+    const staff = await prisma.staff.update({
+        where: { id: req.params.id },
+        data: { ...(name && { name }), ...(email && { email }), ...(role && { role }), ...(department && { department }), ...(status && { status }) }
+    });
+    await prisma.auditLog.create({ data: { action: 'UPDATED', entity: 'Staff', entityId: staff.id, details: `${staff.name} updated` } });
+    res.json(staff);
+});
+
+app.delete('/api/staff/:id', async (req, res) => {
+    const staff = await prisma.staff.findUnique({ where: { id: req.params.id } });
+    if (!staff) return res.status(404).json({ error: 'Staff not found' });
+    await prisma.staff.delete({ where: { id: req.params.id } });
+    await prisma.auditLog.create({ data: { action: 'DELETED', entity: 'Staff', entityId: req.params.id, details: `${staff.name} removed` } });
+    res.json({ message: 'Staff removed' });
+});
+
+// ─── DEPARTMENT ROUTES ───────────────────────────────────────────
+app.get('/api/departments', async (req, res) => {
+    const departments = await prisma.department.findMany({ orderBy: { createdAt: 'asc' } });
+    res.json(departments);
+});
+
+app.post('/api/departments', async (req, res) => {
+    const { name, capacity } = req.body;
+    if (!name) return res.status(400).json({ error: 'name is required' });
+    const department = await prisma.department.create({ data: { name, capacity: capacity ?? 5 } });
+    await prisma.auditLog.create({ data: { action: 'CREATED', entity: 'Department', entityId: department.id, details: `${name} created with capacity ${capacity ?? 5}` } });
+    res.status(201).json(department);
+});
+
+app.patch('/api/departments/:id', async (req, res) => {
+    const { name, capacity, status } = req.body;
+    const department = await prisma.department.update({
+        where: { id: req.params.id },
+        data: { ...(name && { name }), ...(capacity && { capacity }), ...(status && { status }) }
+    });
+    await prisma.auditLog.create({ data: { action: 'UPDATED', entity: 'Department', entityId: department.id, details: `${department.name} updated` } });
+    res.json(department);
+});
+
+app.delete('/api/departments/:id', async (req, res) => {
+    const dept = await prisma.department.findUnique({ where: { id: req.params.id } });
+    if (!dept) return res.status(404).json({ error: 'Department not found' });
+    await prisma.department.delete({ where: { id: req.params.id } });
+    await prisma.auditLog.create({ data: { action: 'DELETED', entity: 'Department', entityId: req.params.id, details: `${dept.name} removed` } });
+    res.json({ message: 'Department removed' });
+});
+
+// ─── AUDIT LOG ROUTES ────────────────────────────────────────────
+app.get('/api/logs', async (req, res) => {
+    const logs = await prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
+    res.json(logs);
+});
+
+// ─── ANALYTICS ROUTES ────────────────────────────────────────────
+app.get('/api/analytics', async (req, res) => {
+    const [patients, staff, departments, logs] = await Promise.all([
+        prisma.patient.findMany(),
+        prisma.staff.findMany(),
+        prisma.department.findMany(),
+        prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 50 }),
+    ]);
+    res.json({
+        totalPatients: patients.length,
+        totalStaff: staff.length,
+        totalDepartments: departments.length,
+        patientsByPriority: {
+            red: patients.filter((p: { priority: string }) => p.priority === 'red').length,
+            yellow: patients.filter((p: { priority: string }) => p.priority === 'yellow').length,
+            green: patients.filter((p: { priority: string }) => p.priority === 'green').length,
+        },
+        patientsByStatus: {
+            waiting: patients.filter((p: { status: string }) => p.status === 'waiting').length,
+            inTriage: patients.filter((p: { status: string }) => p.status === 'in-triage').length,
+            inDiagnostics: patients.filter((p: { status: string }) => p.status === 'in-diagnostics').length,
+            inTreatment: patients.filter((p: { status: string }) => p.status === 'in-treatment').length,
+            inDischarge: patients.filter((p: { status: string }) => p.status === 'in-discharge').length,
+        },
+        recentActivity: logs,
+    });
 });
 // ─── Socket.io ───────────────────────────────────────────────────
 io.on('connection', (socket) => {
