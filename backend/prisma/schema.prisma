@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Patient {
+  id        String   @id @default(uuid())
+  name      String
+  priority  String
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model Staff {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  role       String
+  department String
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String
+  capacity  Int      @default(5)
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String
+  entity      String
+  entityId    String
+  details     String?
+  performedBy String?
+  createdAt   DateTime @default(now())
+}
