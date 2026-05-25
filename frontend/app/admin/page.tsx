@@ -75,6 +75,90 @@ const actionColors: Record<string, string> = {
   DELETED: 'bg-red-100 text-red-700',
 };
 
+const roomTypeLabels: Record<string, string> = {
+  triage: 'Triage Station',
+  trauma: 'Trauma / Resuscitation',
+  acute_care: 'Acute Care Room',
+  fast_track: 'Fast Track Bay',
+  cdu: 'Clinical Decision Unit',
+  micu: 'Medical ICU',
+  sicu: 'Surgical ICU',
+  cvicu: 'Cardiovascular ICU',
+  neuro_icu: 'Neuro ICU',
+  pre_op: 'Pre-Op Holding Bay',
+  or: 'Operating Room',
+  pacu: 'Post-Anesthesia (PACU)',
+  ldr: 'Labor & Delivery',
+  postpartum: 'Postpartum Maternity',
+  nicu: 'Neonatal ICU',
+  picu: 'Pediatric ICU',
+  med_surg: 'Med/Surg General Ward',
+  oncology: 'Oncology Ward',
+  orthopedic: 'Orthopedic Ward',
+  psychiatric: 'Psychiatric Unit',
+  diagnostic: 'Imaging (CT/MRI/X-Ray)',
+  lab: 'Lab Room',
+  dialysis: 'Dialysis Center',
+  infusion: 'Infusion Center',
+  discharge: 'Discharge Lounge',
+};
+
+const departmentTypeMap: Record<string, { value: string; label: string }[]> = {
+  'Emergency (ED)': [
+    { value: 'triage', label: 'Triage Station' },
+    { value: 'trauma', label: 'Trauma / Resuscitation' },
+    { value: 'acute_care', label: 'Acute Care Room' },
+    { value: 'fast_track', label: 'Fast Track Bay' },
+    { value: 'cdu', label: 'Clinical Decision Unit (CDU)' },
+  ],
+  'Intensive Care': [
+    { value: 'micu', label: 'Medical ICU (MICU)' },
+    { value: 'sicu', label: 'Surgical ICU (SICU)' },
+    { value: 'cvicu', label: 'Cardiovascular ICU (CVICU)' },
+    { value: 'neuro_icu', label: 'Neuro ICU' },
+  ],
+  'Surgical Suite': [
+    { value: 'pre_op', label: 'Pre-Op Holding Bay' },
+    { value: 'or', label: 'Operating Room (OR)' },
+    { value: 'pacu', label: 'Post-Anesthesia (PACU)' },
+  ],
+  'Women & Children': [
+    { value: 'ldr', label: 'Labor & Delivery (LDR)' },
+    { value: 'postpartum', label: 'Postpartum Maternity' },
+    { value: 'nicu', label: 'Neonatal ICU (NICU)' },
+    { value: 'picu', label: 'Pediatric ICU (PICU)' },
+  ],
+  'Inpatient Wards': [
+    { value: 'med_surg', label: 'Med/Surg General Ward' },
+    { value: 'oncology', label: 'Oncology Ward' },
+    { value: 'orthopedic', label: 'Orthopedic Ward' },
+    { value: 'psychiatric', label: 'Psychiatric Unit' },
+  ],
+  'Diagnostics': [
+    { value: 'diagnostic', label: 'Imaging (CT/MRI/X-Ray)' },
+    { value: 'lab', label: 'Lab Room' },
+  ],
+  'Therapeutics': [
+    { value: 'dialysis', label: 'Dialysis Center' },
+    { value: 'infusion', label: 'Infusion Center' },
+  ],
+  'Triage': [
+    { value: 'triage', label: 'Triage Station' },
+    { value: 'trauma', label: 'Trauma / Resuscitation' },
+    { value: 'acute_care', label: 'Acute Care Room' },
+  ],
+  'Treatment': [
+    { value: 'or', label: 'Operating Room (OR)' },
+    { value: 'micu', label: 'Medical ICU (MICU)' },
+    { value: 'sicu', label: 'Surgical ICU (SICU)' },
+    { value: 'med_surg', label: 'Med/Surg General Ward' },
+  ],
+  'Discharge': [
+    { value: 'discharge', label: 'Discharge Lounge' },
+    { value: 'pacu', label: 'Post-Anesthesia (PACU)' },
+  ],
+};
+
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('analytics');
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -88,55 +172,39 @@ export default function AdminPanel() {
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [showRoomForm, setShowRoomForm] = useState(false);
-  const [roomForm, setRoomForm] = useState({ name: '', type: 'triage', department: 'Triage' });
+  const [roomForm, setRoomForm] = useState({ name: '', type: 'triage', department: 'Emergency (ED)' });
   const [dark, setDark] = useState(false);
+  const [roomFilter, setRoomFilter] = useState('all');
+  const [roomSearch, setRoomSearch] = useState('');
 
-
-useEffect(() => {
-  const token = localStorage.getItem('token');
-  const raw = localStorage.getItem('user');
-  if (!token || !raw) {
-    window.location.href = '/login';
-    return;
-  }
-  try {
-    const user = JSON.parse(raw);
-    if (user.role !== 'admin') {
-      window.location.href = '/';
-    }
-  } catch {
-    window.location.href = '/login';
-  }
-}, []);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const raw = localStorage.getItem('user');
+    if (!token || !raw) { window.location.href = '/login'; return; }
+    try {
+      const user = JSON.parse(raw);
+      if (user.role !== 'admin') window.location.href = '/';
+    } catch { window.location.href = '/login'; }
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
 
   const fetchAll = () => {
-    fetch(`${API}/api/staff`)
-      .then(r => { if (!r.ok) throw new Error(`staff: ${r.status}`); return r.json(); })
-      .then(setStaff).catch(console.error);
-    fetch(`${API}/api/departments`)
-      .then(r => { if (!r.ok) throw new Error(`departments: ${r.status}`); return r.json(); })
-      .then(setDepartments).catch(console.error);
-    fetch(`${API}/api/logs`)
-      .then(r => { if (!r.ok) throw new Error(`logs: ${r.status}`); return r.json(); })
-      .then(setLogs).catch(console.error);
-    fetch(`${API}/api/analytics`)
-      .then(r => { if (!r.ok) throw new Error(`analytics: ${r.status}`); return r.json(); })
-      .then(setAnalytics).catch(console.error);
-    fetch(`${API}/api/rooms`)
-      .then(r => { if (!r.ok) throw new Error(`rooms: ${r.status}`); return r.json(); })
-      .then(setRooms).catch(console.error);
+    fetch(`${API}/api/staff`).then(r => r.json()).then(setStaff).catch(console.error);
+    fetch(`${API}/api/departments`).then(r => r.json()).then(setDepartments).catch(console.error);
+    fetch(`${API}/api/logs`).then(r => r.json()).then(setLogs).catch(console.error);
+    fetch(`${API}/api/analytics`).then(r => r.json()).then(setAnalytics).catch(console.error);
+    fetch(`${API}/api/rooms`).then(r => r.json()).then(setRooms).catch(console.error);
   };
-    useEffect(() => { fetchAll(); }, []);
+
+  useEffect(() => { fetchAll(); }, []);
 
   const addStaff = async () => {
     if (!staffForm.name || !staffForm.email) return;
     await fetch(`${API}/api/staff`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(staffForm),
     });
     setStaffForm({ name: '', email: '', role: 'nurse', department: 'Triage' });
@@ -152,8 +220,7 @@ useEffect(() => {
   const updateStaff = async () => {
     if (!editingStaff) return;
     await fetch(`${API}/api/staff/${editingStaff.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editingStaff),
     });
     setEditingStaff(null);
@@ -163,8 +230,7 @@ useEffect(() => {
   const addDept = async () => {
     if (!deptForm.name) return;
     await fetch(`${API}/api/departments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(deptForm),
     });
     setDeptForm({ name: '', capacity: 5 });
@@ -178,69 +244,72 @@ useEffect(() => {
   };
 
   const addRoom = async () => {
-  if (!roomForm.name) return;
-  await fetch(`${API}/api/rooms`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(roomForm),
-  });
-  setRoomForm({ name: '', type: 'triage', department: 'Triage' });
-  setShowRoomForm(false);
-  fetchAll();
-};
+    if (!roomForm.name) return;
+    await fetch(`${API}/api/rooms`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(roomForm),
+    });
+    setRoomForm({ name: '', type: 'triage', department: 'Emergency (ED)' });
+    setShowRoomForm(false);
+    fetchAll();
+  };
 
-const updateRoomStatus = async (id: string, status: string) => {
-  await fetch(`${API}/api/rooms/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
-  fetchAll();
-};
+  const updateRoomStatus = async (id: string, status: string) => {
+    await fetch(`${API}/api/rooms/${id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    fetchAll();
+  };
 
-const deleteRoom = async (id: string) => {
-  await fetch(`${API}/api/rooms/${id}`, { method: 'DELETE' });
-  fetchAll();
-};
+  const deleteRoom = async (id: string) => {
+    await fetch(`${API}/api/rooms/${id}`, { method: 'DELETE' });
+    fetchAll();
+  };
 
-
+  const filteredRooms = rooms
+    .filter(r => roomFilter === 'all' || r.status === roomFilter)
+    .filter(r =>
+      roomSearch === '' ||
+      r.name.toLowerCase().includes(roomSearch.toLowerCase()) ||
+      r.department.toLowerCase().includes(roomSearch.toLowerCase()) ||
+      (roomTypeLabels[r.type] ?? r.type).toLowerCase().includes(roomSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      const order = { open: 0, cleaning: 1, occupied: 2 };
+      return (order[a.status as keyof typeof order] ?? 3) - (order[b.status as keyof typeof order] ?? 3);
+    });
 
   return (
     <div className="min-h-screen transition-colors" style={{ background: 'var(--background)' }}>
 
       {/* Header */}
       <header className="border-b px-6 py-4 flex items-center justify-between"
-  style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-  <div className="flex items-center gap-4">
-    <a href="/" className="flex items-center gap-1.5 text-sm hover:opacity-70 transition"
-      style={{ color: 'var(--muted)' }}>
-      <ArrowLeft size={16} /> Dashboard
-    </a>
-    <div className="w-px h-5" style={{ background: 'var(--border)' }} />
-    <div>
-      <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>NexusCare Admin</h1>
-      <p className="text-xs" style={{ color: 'var(--muted)' }}>System Management Panel</p>
-    </div>
-  </div>
-  <div className="flex items-center gap-2">
-    <button onClick={() => setDark(!dark)}
-      className="p-2 rounded-lg border hover:opacity-80 transition"
-      style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-      {dark ? <Sun size={16} /> : <Moon size={16} />}
-    </button>
-    <button
-      onClick={() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-      }}
-      className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
-      style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-      Logout
-    </button>
-  </div>
-</header>
-      
+        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-4">
+          <a href="/" className="flex items-center gap-1.5 text-sm hover:opacity-70 transition"
+            style={{ color: 'var(--muted)' }}>
+            <ArrowLeft size={16} /> Dashboard
+          </a>
+          <div className="w-px h-5" style={{ background: 'var(--border)' }} />
+          <div>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>NexusCare Admin</h1>
+            <p className="text-xs" style={{ color: 'var(--muted)' }}>System Management Panel</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setDark(!dark)}
+            className="p-2 rounded-lg border hover:opacity-80 transition"
+            style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+            {dark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; }}
+            className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
+            style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+            Logout
+          </button>
+        </div>
+      </header>
 
       {/* Tabs */}
       <div className="border-b px-6" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
@@ -250,9 +319,7 @@ const deleteRoom = async (id: string) => {
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition ${
-                  activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent hover:opacity-80'
+                  activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent hover:opacity-80'
                 }`}
                 style={{ color: activeTab === tab.id ? undefined : 'var(--muted)' }}>
                 <Icon size={15} />
@@ -268,13 +335,11 @@ const deleteRoom = async (id: string) => {
         {/* ── ANALYTICS TAB ── */}
         {activeTab === 'analytics' && analytics && (
           <div className="space-y-6 animate-fade-in">
-
-            {/* Top Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { label: 'Total Patients',   value: analytics.totalPatients,    color: 'bg-blue-500',   sub: 'currently in system' },
-                { label: 'Total Staff',       value: analytics.totalStaff,       color: 'bg-purple-500', sub: 'registered members' },
-                { label: 'Departments',       value: analytics.totalDepartments, color: 'bg-orange-500', sub: 'active departments' },
+                { label: 'Total Patients', value: analytics.totalPatients,    color: 'bg-blue-500',   sub: 'currently in system' },
+                { label: 'Total Staff',    value: analytics.totalStaff,       color: 'bg-purple-500', sub: 'registered members' },
+                { label: 'Departments',    value: analytics.totalDepartments, color: 'bg-orange-500', sub: 'active departments' },
               ].map(stat => (
                 <div key={stat.label} className="rounded-xl border p-6 shadow-sm hover:shadow-md transition-shadow"
                   style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
@@ -288,9 +353,7 @@ const deleteRoom = async (id: string) => {
               ))}
             </div>
 
-            {/* Priority + Status side by side */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Priority */}
               <div className="rounded-xl border p-6 shadow-sm" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
                 <h2 className="font-semibold mb-4" style={{ color: 'var(--foreground)' }}>Patients by Priority</h2>
                 <div className="grid grid-cols-3 gap-3">
@@ -307,7 +370,6 @@ const deleteRoom = async (id: string) => {
                 </div>
               </div>
 
-              {/* Status */}
               <div className="rounded-xl border p-6 shadow-sm" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
                 <h2 className="font-semibold mb-4" style={{ color: 'var(--foreground)' }}>Patients by Status</h2>
                 <div className="space-y-3">
@@ -331,7 +393,6 @@ const deleteRoom = async (id: string) => {
               </div>
             </div>
 
-            {/* Recent Activity */}
             <div className="rounded-xl border p-6 shadow-sm" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
               <h2 className="font-semibold mb-4" style={{ color: 'var(--foreground)' }}>Recent Activity</h2>
               <div className="space-y-2">
@@ -400,10 +461,7 @@ const deleteRoom = async (id: string) => {
                   <select className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                     value={staffForm.department} onChange={e => setStaffForm({ ...staffForm, department: e.target.value })}>
-                    <option>Triage</option>
-                    <option>Diagnostics</option>
-                    <option>Treatment</option>
-                    <option>Discharge</option>
+                    {Object.keys(departmentTypeMap).map(d => <option key={d}>{d}</option>)}
                   </select>
                 </div>
                 <div className="col-span-2 md:col-span-4 flex gap-2">
@@ -508,7 +566,7 @@ const deleteRoom = async (id: string) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {departments.map(dept => (
-                <div key={dept.id} className="rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow animate-slide-in"
+                <div key={dept.id} className="rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow"
                   style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
                   <div className="flex justify-between items-start mb-3">
                     <div>
@@ -535,122 +593,143 @@ const deleteRoom = async (id: string) => {
         )}
 
         {/* ── ROOMS TAB ── */}
-{activeTab === 'rooms' && (
-  <div className="space-y-4 animate-fade-in">
-    <div className="flex justify-between items-center">
-      <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
-        Flow Rooms <span className="text-sm font-normal" style={{ color: 'var(--muted)' }}>({rooms.length})</span>
-      </h2>
-      <button onClick={() => setShowRoomForm(!showRoomForm)}
-        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
-        <Plus size={15} /> Add Room
-      </button>
-    </div>
-
-    {showRoomForm && (
-      <div className="rounded-xl border p-4 shadow-sm animate-slide-in flex gap-4 items-end flex-wrap"
-        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-        <div className="flex-1 min-w-40">
-          <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Room Name</label>
-          <input className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-            placeholder="e.g. Triage Room 1"
-            value={roomForm.name} onChange={e => setRoomForm({ ...roomForm, name: e.target.value })} />
-        </div>
-        <div>
-          <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Type</label>
-          <select className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-            value={roomForm.type} onChange={e => setRoomForm({ ...roomForm, type: e.target.value })}>
-            <option value="triage">Triage Hub</option>
-            <option value="diagnostic">Diagnostic Node</option>
-            <option value="treatment">Treatment Zone</option>
-            <option value="discharge">Discharge Lounge</option>
-          </select>
-        </div>
-        <div>
-          <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Department</label>
-          <select className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-            value={roomForm.department} onChange={e => setRoomForm({ ...roomForm, department: e.target.value })}>
-            <option>Triage</option>
-            <option>Diagnostics</option>
-            <option>Treatment</option>
-            <option>Discharge</option>
-          </select>
-        </div>
-        <button onClick={addRoom} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">Add</button>
-        <button onClick={() => setShowRoomForm(false)} className="text-sm px-3 py-2 rounded-lg hover:opacity-70 transition" style={{ color: 'var(--muted)' }}>Cancel</button>
-      </div>
-    )}
-
-    {/* Room status summary */}
-    <div className="grid grid-cols-3 gap-4">
-      {[
-        { label: 'Open',     color: 'bg-emerald-500', count: rooms.filter(r => r.status === 'open').length },
-        { label: 'Occupied', color: 'bg-red-500',     count: rooms.filter(r => r.status === 'occupied').length },
-        { label: 'Cleaning', color: 'bg-amber-400',   count: rooms.filter(r => r.status === 'cleaning').length },
-      ].map(s => (
-        <div key={s.label} className="rounded-xl border p-4 shadow-sm text-center"
-          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-          <div className={`${s.color} text-white text-2xl font-bold rounded-lg py-3 mb-2`}>{s.count}</div>
-          <p className="text-sm font-medium" style={{ color: 'var(--muted)' }}>{s.label}</p>
-        </div>
-      ))}
-    </div>
-
-    {/* Rooms grid */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {rooms.map(room => {
-        const statusConfig = {
-          open:     { color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
-          occupied: { color: 'bg-red-100 text-red-700',         dot: 'bg-red-500' },
-          cleaning: { color: 'bg-amber-100 text-amber-700',     dot: 'bg-amber-500' },
-        };
-        const s = statusConfig[room.status as keyof typeof statusConfig] ?? statusConfig.open;
-        return (
-          <div key={room.id} className="rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow animate-slide-in"
-            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <h3 className="font-semibold" style={{ color: 'var(--foreground)' }}>{room.name}</h3>
-                <p className="text-xs capitalize" style={{ color: 'var(--muted)' }}>{room.type.replace('_', ' ')} · {room.department}</p>
-              </div>
-              <button onClick={() => deleteRoom(room.id)} className="text-red-400 hover:text-red-600 transition">
-                <Trash2 size={15} />
-              </button>
-            </div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full font-medium ${s.color}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-                {room.status}
-              </span>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {['open', 'occupied', 'cleaning'].map(st => (
-                <button key={st} onClick={() => updateRoomStatus(room.id, st)}
-                  disabled={room.status === st}
-                  className={`text-xs px-2 py-1 rounded-lg border transition capitalize font-medium
-                    ${room.status === st
-                      ? 'opacity-40 cursor-not-allowed'
-                      : 'hover:opacity-80'
+        {activeTab === 'rooms' && (
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex justify-between items-center flex-wrap gap-3">
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
+                Flow Rooms <span className="text-sm font-normal" style={{ color: 'var(--muted)' }}>({rooms.length} total)</span>
+              </h2>
+              <div className="flex gap-2 items-center flex-wrap">
+                {['all', 'open', 'occupied', 'cleaning'].map(f => (
+                  <button key={f} onClick={() => setRoomFilter(f)}
+                    className={`text-xs px-3 py-1.5 rounded-lg border capitalize font-medium transition ${
+                      roomFilter === f ? 'bg-blue-600 text-white border-blue-600' : 'hover:opacity-80'
                     }`}
-                  style={{ borderColor: 'var(--border)', color: 'var(--muted)', background: 'var(--background)' }}>
-                  {st}
+                    style={roomFilter === f ? {} : { borderColor: 'var(--border)', color: 'var(--muted)', background: 'var(--background)' }}>
+                    {f} {f !== 'all' && `(${rooms.filter(r => r.status === f).length})`}
+                  </button>
+                ))}
+                <button onClick={() => setShowRoomForm(!showRoomForm)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                  <Plus size={15} /> Add Room
                 </button>
+              </div>
+            </div>
+
+            {/* Search bar */}
+            <input
+              className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+              placeholder="🔍 Search rooms by name, type, or department..."
+              value={roomSearch}
+              onChange={e => setRoomSearch(e.target.value)}
+            />
+
+            {showRoomForm && (
+              <div className="rounded-xl border p-4 shadow-sm animate-slide-in grid grid-cols-1 md:grid-cols-3 gap-4"
+                style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+                <div>
+                  <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Room Name</label>
+                  <input className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    placeholder="e.g. Triage Room 1"
+                    value={roomForm.name} onChange={e => setRoomForm({ ...roomForm, name: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Department</label>
+                  <select className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    value={roomForm.department}
+                    onChange={e => setRoomForm({ ...roomForm, department: e.target.value, type: departmentTypeMap[e.target.value]?.[0]?.value ?? 'triage' })}>
+                    {Object.keys(departmentTypeMap).map(dept => (
+                      <option key={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Type</label>
+                  <select className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    value={roomForm.type} onChange={e => setRoomForm({ ...roomForm, type: e.target.value })}>
+                    {(departmentTypeMap[roomForm.department] ?? []).map(t => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-3 flex gap-2">
+                  <button onClick={addRoom} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">Add Room</button>
+                  <button onClick={() => setShowRoomForm(false)} className="text-sm px-3 py-2 rounded-lg hover:opacity-70 transition" style={{ color: 'var(--muted)' }}>Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {/* Room status summary */}
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: 'Open',     color: 'bg-emerald-500', count: rooms.filter(r => r.status === 'open').length },
+                { label: 'Occupied', color: 'bg-red-500',     count: rooms.filter(r => r.status === 'occupied').length },
+                { label: 'Cleaning', color: 'bg-amber-400',   count: rooms.filter(r => r.status === 'cleaning').length },
+              ].map(s => (
+                <div key={s.label} className="rounded-xl border p-4 shadow-sm text-center"
+                  style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+                  <div className={`${s.color} text-white text-2xl font-bold rounded-lg py-3 mb-2`}>{s.count}</div>
+                  <p className="text-sm font-medium" style={{ color: 'var(--muted)' }}>{s.label}</p>
+                </div>
               ))}
             </div>
+
+            {/* Rooms grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRooms.map(room => {
+                const statusConfig = {
+                  open:     { color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+                  occupied: { color: 'bg-red-100 text-red-700',         dot: 'bg-red-500' },
+                  cleaning: { color: 'bg-amber-100 text-amber-700',     dot: 'bg-amber-500' },
+                };
+                const s = statusConfig[room.status as keyof typeof statusConfig] ?? statusConfig.open;
+                return (
+                  <div key={room.id} className="rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow"
+                    style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-semibold" style={{ color: 'var(--foreground)' }}>{room.name}</h3>
+                        <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                          {roomTypeLabels[room.type] ?? room.type} · {room.department}
+                        </p>
+                      </div>
+                      <button onClick={() => deleteRoom(room.id)} className="text-red-400 hover:text-red-600 transition">
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full font-medium ${s.color}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                        {room.status}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {['open', 'occupied', 'cleaning'].map(st => (
+                        <button key={st} onClick={() => updateRoomStatus(room.id, st)}
+                          disabled={room.status === st}
+                          className={`text-xs px-2 py-1 rounded-lg border transition capitalize font-medium ${
+                            room.status === st ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-80'
+                          }`}
+                          style={{ borderColor: 'var(--border)', color: 'var(--muted)', background: 'var(--background)' }}>
+                          {st}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {filteredRooms.length === 0 && (
+                <div className="col-span-3 text-center py-10 text-sm italic" style={{ color: 'var(--muted)' }}>
+                  No rooms found
+                </div>
+              )}
+            </div>
           </div>
-        );
-      })}
-      {rooms.length === 0 && (
-        <div className="col-span-3 text-center py-10 text-sm italic" style={{ color: 'var(--muted)' }}>
-          No rooms added yet
-        </div>
-      )}
-    </div>
-  </div>
-)}
+        )}
 
         {/* ── AUDIT LOG TAB ── */}
         {activeTab === 'logs' && (

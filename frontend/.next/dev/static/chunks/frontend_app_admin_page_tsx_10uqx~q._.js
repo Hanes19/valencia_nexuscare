@@ -65,6 +65,187 @@ const actionColors = {
     UPDATED: 'bg-blue-100 text-blue-700',
     DELETED: 'bg-red-100 text-red-700'
 };
+const roomTypeLabels = {
+    triage: 'Triage Station',
+    trauma: 'Trauma / Resuscitation',
+    acute_care: 'Acute Care Room',
+    fast_track: 'Fast Track Bay',
+    cdu: 'Clinical Decision Unit',
+    micu: 'Medical ICU',
+    sicu: 'Surgical ICU',
+    cvicu: 'Cardiovascular ICU',
+    neuro_icu: 'Neuro ICU',
+    pre_op: 'Pre-Op Holding Bay',
+    or: 'Operating Room',
+    pacu: 'Post-Anesthesia (PACU)',
+    ldr: 'Labor & Delivery',
+    postpartum: 'Postpartum Maternity',
+    nicu: 'Neonatal ICU',
+    picu: 'Pediatric ICU',
+    med_surg: 'Med/Surg General Ward',
+    oncology: 'Oncology Ward',
+    orthopedic: 'Orthopedic Ward',
+    psychiatric: 'Psychiatric Unit',
+    diagnostic: 'Imaging (CT/MRI/X-Ray)',
+    lab: 'Lab Room',
+    dialysis: 'Dialysis Center',
+    infusion: 'Infusion Center',
+    discharge: 'Discharge Lounge'
+};
+const departmentTypeMap = {
+    'Emergency (ED)': [
+        {
+            value: 'triage',
+            label: 'Triage Station'
+        },
+        {
+            value: 'trauma',
+            label: 'Trauma / Resuscitation'
+        },
+        {
+            value: 'acute_care',
+            label: 'Acute Care Room'
+        },
+        {
+            value: 'fast_track',
+            label: 'Fast Track Bay'
+        },
+        {
+            value: 'cdu',
+            label: 'Clinical Decision Unit (CDU)'
+        }
+    ],
+    'Intensive Care': [
+        {
+            value: 'micu',
+            label: 'Medical ICU (MICU)'
+        },
+        {
+            value: 'sicu',
+            label: 'Surgical ICU (SICU)'
+        },
+        {
+            value: 'cvicu',
+            label: 'Cardiovascular ICU (CVICU)'
+        },
+        {
+            value: 'neuro_icu',
+            label: 'Neuro ICU'
+        }
+    ],
+    'Surgical Suite': [
+        {
+            value: 'pre_op',
+            label: 'Pre-Op Holding Bay'
+        },
+        {
+            value: 'or',
+            label: 'Operating Room (OR)'
+        },
+        {
+            value: 'pacu',
+            label: 'Post-Anesthesia (PACU)'
+        }
+    ],
+    'Women & Children': [
+        {
+            value: 'ldr',
+            label: 'Labor & Delivery (LDR)'
+        },
+        {
+            value: 'postpartum',
+            label: 'Postpartum Maternity'
+        },
+        {
+            value: 'nicu',
+            label: 'Neonatal ICU (NICU)'
+        },
+        {
+            value: 'picu',
+            label: 'Pediatric ICU (PICU)'
+        }
+    ],
+    'Inpatient Wards': [
+        {
+            value: 'med_surg',
+            label: 'Med/Surg General Ward'
+        },
+        {
+            value: 'oncology',
+            label: 'Oncology Ward'
+        },
+        {
+            value: 'orthopedic',
+            label: 'Orthopedic Ward'
+        },
+        {
+            value: 'psychiatric',
+            label: 'Psychiatric Unit'
+        }
+    ],
+    'Diagnostics': [
+        {
+            value: 'diagnostic',
+            label: 'Imaging (CT/MRI/X-Ray)'
+        },
+        {
+            value: 'lab',
+            label: 'Lab Room'
+        }
+    ],
+    'Therapeutics': [
+        {
+            value: 'dialysis',
+            label: 'Dialysis Center'
+        },
+        {
+            value: 'infusion',
+            label: 'Infusion Center'
+        }
+    ],
+    'Triage': [
+        {
+            value: 'triage',
+            label: 'Triage Station'
+        },
+        {
+            value: 'trauma',
+            label: 'Trauma / Resuscitation'
+        },
+        {
+            value: 'acute_care',
+            label: 'Acute Care Room'
+        }
+    ],
+    'Treatment': [
+        {
+            value: 'or',
+            label: 'Operating Room (OR)'
+        },
+        {
+            value: 'micu',
+            label: 'Medical ICU (MICU)'
+        },
+        {
+            value: 'sicu',
+            label: 'Surgical ICU (SICU)'
+        },
+        {
+            value: 'med_surg',
+            label: 'Med/Surg General Ward'
+        }
+    ],
+    'Discharge': [
+        {
+            value: 'discharge',
+            label: 'Discharge Lounge'
+        },
+        {
+            value: 'pacu',
+            label: 'Post-Anesthesia (PACU)'
+        }
+    ]
+};
 function AdminPanel() {
     _s();
     const [activeTab, setActiveTab] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('analytics');
@@ -90,9 +271,11 @@ function AdminPanel() {
     const [roomForm, setRoomForm] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
         name: '',
         type: 'triage',
-        department: 'Triage'
+        department: 'Emergency (ED)'
     });
     const [dark, setDark] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [roomFilter, setRoomFilter] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('all');
+    const [roomSearch, setRoomSearch] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('');
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AdminPanel.useEffect": ()=>{
             const token = localStorage.getItem('token');
@@ -103,9 +286,7 @@ function AdminPanel() {
             }
             try {
                 const user = JSON.parse(raw);
-                if (user.role !== 'admin') {
-                    window.location.href = '/';
-                }
+                if (user.role !== 'admin') window.location.href = '/';
             } catch  {
                 window.location.href = '/login';
             }
@@ -119,26 +300,11 @@ function AdminPanel() {
         dark
     ]);
     const fetchAll = ()=>{
-        fetch(`${API}/api/staff`).then((r)=>{
-            if (!r.ok) throw new Error(`staff: ${r.status}`);
-            return r.json();
-        }).then(setStaff).catch(console.error);
-        fetch(`${API}/api/departments`).then((r)=>{
-            if (!r.ok) throw new Error(`departments: ${r.status}`);
-            return r.json();
-        }).then(setDepartments).catch(console.error);
-        fetch(`${API}/api/logs`).then((r)=>{
-            if (!r.ok) throw new Error(`logs: ${r.status}`);
-            return r.json();
-        }).then(setLogs).catch(console.error);
-        fetch(`${API}/api/analytics`).then((r)=>{
-            if (!r.ok) throw new Error(`analytics: ${r.status}`);
-            return r.json();
-        }).then(setAnalytics).catch(console.error);
-        fetch(`${API}/api/rooms`).then((r)=>{
-            if (!r.ok) throw new Error(`rooms: ${r.status}`);
-            return r.json();
-        }).then(setRooms).catch(console.error);
+        fetch(`${API}/api/staff`).then((r)=>r.json()).then(setStaff).catch(console.error);
+        fetch(`${API}/api/departments`).then((r)=>r.json()).then(setDepartments).catch(console.error);
+        fetch(`${API}/api/logs`).then((r)=>r.json()).then(setLogs).catch(console.error);
+        fetch(`${API}/api/analytics`).then((r)=>r.json()).then(setAnalytics).catch(console.error);
+        fetch(`${API}/api/rooms`).then((r)=>r.json()).then(setRooms).catch(console.error);
     };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AdminPanel.useEffect": ()=>{
@@ -215,7 +381,7 @@ function AdminPanel() {
         setRoomForm({
             name: '',
             type: 'triage',
-            department: 'Triage'
+            department: 'Emergency (ED)'
         });
         setShowRoomForm(false);
         fetchAll();
@@ -238,6 +404,14 @@ function AdminPanel() {
         });
         fetchAll();
     };
+    const filteredRooms = rooms.filter((r)=>roomFilter === 'all' || r.status === roomFilter).filter((r)=>roomSearch === '' || r.name.toLowerCase().includes(roomSearch.toLowerCase()) || r.department.toLowerCase().includes(roomSearch.toLowerCase()) || (roomTypeLabels[r.type] ?? r.type).toLowerCase().includes(roomSearch.toLowerCase())).sort((a, b)=>{
+        const order = {
+            open: 0,
+            cleaning: 1,
+            occupied: 2
+        };
+        return (order[a.status] ?? 3) - (order[b.status] ?? 3);
+    });
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "min-h-screen transition-colors",
         style: {
@@ -265,15 +439,15 @@ function AdminPanel() {
                                         size: 16
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 217,
-                                        columnNumber: 7
+                                        lineNumber: 292,
+                                        columnNumber: 13
                                     }, this),
                                     " Dashboard"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 215,
-                                columnNumber: 5
+                                lineNumber: 290,
+                                columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "w-px h-5",
@@ -282,8 +456,8 @@ function AdminPanel() {
                                 }
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 219,
-                                columnNumber: 5
+                                lineNumber: 294,
+                                columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 children: [
@@ -295,8 +469,8 @@ function AdminPanel() {
                                         children: "NexusCare Admin"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 221,
-                                        columnNumber: 7
+                                        lineNumber: 296,
+                                        columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "text-xs",
@@ -306,20 +480,20 @@ function AdminPanel() {
                                         children: "System Management Panel"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 222,
-                                        columnNumber: 7
+                                        lineNumber: 297,
+                                        columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 220,
-                                columnNumber: 5
+                                lineNumber: 295,
+                                columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/admin/page.tsx",
-                        lineNumber: 214,
-                        columnNumber: 3
+                        lineNumber: 289,
+                        columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "flex items-center gap-2",
@@ -336,19 +510,19 @@ function AdminPanel() {
                                     size: 16
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                    lineNumber: 229,
-                                    columnNumber: 15
+                                    lineNumber: 304,
+                                    columnNumber: 21
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$moon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Moon$3e$__["Moon"], {
                                     size: 16
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                    lineNumber: 229,
-                                    columnNumber: 35
+                                    lineNumber: 304,
+                                    columnNumber: 41
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 226,
-                                columnNumber: 5
+                                lineNumber: 301,
+                                columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                 onClick: ()=>{
@@ -365,19 +539,19 @@ function AdminPanel() {
                                 children: "Logout"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 231,
-                                columnNumber: 5
+                                lineNumber: 306,
+                                columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/admin/page.tsx",
-                        lineNumber: 225,
-                        columnNumber: 3
+                        lineNumber: 300,
+                        columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/frontend/app/admin/page.tsx",
-                lineNumber: 212,
+                lineNumber: 287,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -401,25 +575,25 @@ function AdminPanel() {
                                     size: 15
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                    lineNumber: 258,
+                                    lineNumber: 325,
                                     columnNumber: 17
                                 }, this),
                                 tab.label
                             ]
                         }, tab.id, true, {
                             fileName: "[project]/frontend/app/admin/page.tsx",
-                            lineNumber: 251,
+                            lineNumber: 320,
                             columnNumber: 15
                         }, this);
                     })
                 }, void 0, false, {
                     fileName: "[project]/frontend/app/admin/page.tsx",
-                    lineNumber: 247,
+                    lineNumber: 316,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/frontend/app/admin/page.tsx",
-                lineNumber: 246,
+                lineNumber: 315,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -463,12 +637,12 @@ function AdminPanel() {
                                                     children: stat.value
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 282,
+                                                    lineNumber: 347,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 281,
+                                                lineNumber: 346,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -479,7 +653,7 @@ function AdminPanel() {
                                                 children: stat.value
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 284,
+                                                lineNumber: 349,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -490,7 +664,7 @@ function AdminPanel() {
                                                 children: stat.label
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 285,
+                                                lineNumber: 350,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -501,18 +675,18 @@ function AdminPanel() {
                                                 children: stat.sub
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 286,
+                                                lineNumber: 351,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, stat.label, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 279,
+                                        lineNumber: 344,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 273,
+                                lineNumber: 338,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -533,7 +707,7 @@ function AdminPanel() {
                                                 children: "Patients by Priority"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 295,
+                                                lineNumber: 358,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -562,7 +736,7 @@ function AdminPanel() {
                                                                 children: p.value
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 303,
+                                                                lineNumber: 366,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -573,24 +747,24 @@ function AdminPanel() {
                                                                 children: p.label
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 304,
+                                                                lineNumber: 367,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, p.label, true, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 302,
+                                                        lineNumber: 365,
                                                         columnNumber: 21
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 296,
+                                                lineNumber: 359,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 294,
+                                        lineNumber: 357,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -608,7 +782,7 @@ function AdminPanel() {
                                                 children: "Patients by Status"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 312,
+                                                lineNumber: 374,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -645,7 +819,7 @@ function AdminPanel() {
                                                                 children: s.label
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 322,
+                                                                lineNumber: 384,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -660,12 +834,12 @@ function AdminPanel() {
                                                                     }
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 324,
+                                                                    lineNumber: 386,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 323,
+                                                                lineNumber: 385,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -676,30 +850,30 @@ function AdminPanel() {
                                                                 children: s.value
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 327,
+                                                                lineNumber: 389,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, s.label, true, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 321,
+                                                        lineNumber: 383,
                                                         columnNumber: 21
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 313,
+                                                lineNumber: 375,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 311,
+                                        lineNumber: 373,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 292,
+                                lineNumber: 356,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -717,7 +891,7 @@ function AdminPanel() {
                                         children: "Recent Activity"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 336,
+                                        lineNumber: 397,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -734,7 +908,7 @@ function AdminPanel() {
                                                             children: log.action
                                                         }, void 0, false, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 341,
+                                                            lineNumber: 402,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -744,7 +918,7 @@ function AdminPanel() {
                                                             children: log.details
                                                         }, void 0, false, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 344,
+                                                            lineNumber: 405,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -755,13 +929,13 @@ function AdminPanel() {
                                                             children: new Date(log.createdAt).toLocaleTimeString()
                                                         }, void 0, false, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 345,
+                                                            lineNumber: 406,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, log.id, true, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 339,
+                                                    lineNumber: 400,
                                                     columnNumber: 19
                                                 }, this)),
                                             analytics.recentActivity.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -772,25 +946,25 @@ function AdminPanel() {
                                                 children: "No activity yet"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 351,
+                                                lineNumber: 412,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 337,
+                                        lineNumber: 398,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 335,
+                                lineNumber: 396,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/admin/page.tsx",
-                        lineNumber: 270,
+                        lineNumber: 337,
                         columnNumber: 11
                     }, this),
                     activeTab === 'staff' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -818,13 +992,13 @@ function AdminPanel() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 363,
+                                                lineNumber: 424,
                                                 columnNumber: 31
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 362,
+                                        lineNumber: 423,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -835,20 +1009,20 @@ function AdminPanel() {
                                                 size: 15
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 367,
+                                                lineNumber: 428,
                                                 columnNumber: 17
                                             }, this),
                                             " Add Staff"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 365,
+                                        lineNumber: 426,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 361,
+                                lineNumber: 422,
                                 columnNumber: 13
                             }, this),
                             showStaffForm && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -881,7 +1055,7 @@ function AdminPanel() {
                                                     children: f.label
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 379,
+                                                    lineNumber: 440,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -900,13 +1074,13 @@ function AdminPanel() {
                                                         })
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 380,
+                                                    lineNumber: 441,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, f.key, true, {
                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                            lineNumber: 378,
+                                            lineNumber: 439,
                                             columnNumber: 19
                                         }, this)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -919,7 +1093,7 @@ function AdminPanel() {
                                                 children: "Role"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 388,
+                                                lineNumber: 449,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -940,7 +1114,7 @@ function AdminPanel() {
                                                         children: "Nurse"
                                                     }, void 0, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 392,
+                                                        lineNumber: 453,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -948,7 +1122,7 @@ function AdminPanel() {
                                                         children: "Doctor"
                                                     }, void 0, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 393,
+                                                        lineNumber: 454,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -956,7 +1130,7 @@ function AdminPanel() {
                                                         children: "Lab Tech"
                                                     }, void 0, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 394,
+                                                        lineNumber: 455,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -964,19 +1138,19 @@ function AdminPanel() {
                                                         children: "Admin"
                                                     }, void 0, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 395,
+                                                        lineNumber: 456,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 389,
+                                                lineNumber: 450,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 387,
+                                        lineNumber: 448,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -989,7 +1163,7 @@ function AdminPanel() {
                                                 children: "Department"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 399,
+                                                lineNumber: 460,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -1004,45 +1178,22 @@ function AdminPanel() {
                                                         ...staffForm,
                                                         department: e.target.value
                                                     }),
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        children: "Triage"
-                                                    }, void 0, false, {
+                                                children: Object.keys(departmentTypeMap).map((d)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                        children: d
+                                                    }, d, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 403,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        children: "Diagnostics"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 404,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        children: "Treatment"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 405,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        children: "Discharge"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 406,
-                                                        columnNumber: 21
-                                                    }, this)
-                                                ]
-                                            }, void 0, true, {
+                                                        lineNumber: 464,
+                                                        columnNumber: 62
+                                                    }, this))
+                                            }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 400,
+                                                lineNumber: 461,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 398,
+                                        lineNumber: 459,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1054,7 +1205,7 @@ function AdminPanel() {
                                                 children: "Add"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 410,
+                                                lineNumber: 468,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1066,19 +1217,19 @@ function AdminPanel() {
                                                 children: "Cancel"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 411,
+                                                lineNumber: 469,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 409,
+                                        lineNumber: 467,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 372,
+                                lineNumber: 433,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1111,17 +1262,17 @@ function AdminPanel() {
                                                         children: h
                                                     }, h, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 421,
+                                                        lineNumber: 479,
                                                         columnNumber: 23
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 419,
+                                                lineNumber: 477,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                            lineNumber: 418,
+                                            lineNumber: 476,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -1154,12 +1305,12 @@ function AdminPanel() {
                                                                         })
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 430,
+                                                                    lineNumber: 488,
                                                                     columnNumber: 29
                                                                 }, this) : s.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 428,
+                                                                lineNumber: 486,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -1170,7 +1321,7 @@ function AdminPanel() {
                                                                 children: s.email
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 436,
+                                                                lineNumber: 494,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -1180,12 +1331,12 @@ function AdminPanel() {
                                                                     children: s.role.replace('_', ' ')
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 438,
+                                                                    lineNumber: 496,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 437,
+                                                                lineNumber: 495,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -1196,7 +1347,7 @@ function AdminPanel() {
                                                                 children: s.department
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 442,
+                                                                lineNumber: 500,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -1206,12 +1357,12 @@ function AdminPanel() {
                                                                     children: s.status
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 444,
+                                                                    lineNumber: 502,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 443,
+                                                                lineNumber: 501,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -1227,12 +1378,12 @@ function AdminPanel() {
                                                                                     size: 15
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                                    lineNumber: 452,
+                                                                                    lineNumber: 510,
                                                                                     columnNumber: 124
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                                lineNumber: 452,
+                                                                                lineNumber: 510,
                                                                                 columnNumber: 31
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1245,12 +1396,12 @@ function AdminPanel() {
                                                                                     size: 15
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                                    lineNumber: 453,
+                                                                                    lineNumber: 511,
                                                                                     columnNumber: 151
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                                lineNumber: 453,
+                                                                                lineNumber: 511,
                                                                                 columnNumber: 31
                                                                             }, this)
                                                                         ]
@@ -1263,12 +1414,12 @@ function AdminPanel() {
                                                                                     size: 15
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                                    lineNumber: 457,
+                                                                                    lineNumber: 515,
                                                                                     columnNumber: 131
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                                lineNumber: 457,
+                                                                                lineNumber: 515,
                                                                                 columnNumber: 31
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1278,30 +1429,30 @@ function AdminPanel() {
                                                                                     size: 15
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                                    lineNumber: 458,
+                                                                                    lineNumber: 516,
                                                                                     columnNumber: 128
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                                lineNumber: 458,
+                                                                                lineNumber: 516,
                                                                                 columnNumber: 31
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 449,
+                                                                    lineNumber: 507,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 448,
+                                                                lineNumber: 506,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, s.id, true, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 427,
+                                                        lineNumber: 485,
                                                         columnNumber: 21
                                                     }, this)),
                                                 staff.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -1314,35 +1465,35 @@ function AdminPanel() {
                                                         children: "No staff added yet"
                                                     }, void 0, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 466,
+                                                        lineNumber: 524,
                                                         columnNumber: 25
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 466,
+                                                    lineNumber: 524,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                            lineNumber: 425,
+                                            lineNumber: 483,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                    lineNumber: 417,
+                                    lineNumber: 475,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 416,
+                                lineNumber: 474,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/admin/page.tsx",
-                        lineNumber: 360,
+                        lineNumber: 421,
                         columnNumber: 11
                     }, this),
                     activeTab === 'departments' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1370,13 +1521,13 @@ function AdminPanel() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 479,
+                                                lineNumber: 537,
                                                 columnNumber: 29
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 478,
+                                        lineNumber: 536,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1387,20 +1538,20 @@ function AdminPanel() {
                                                 size: 15
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 483,
+                                                lineNumber: 541,
                                                 columnNumber: 17
                                             }, this),
                                             " Add Department"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 481,
+                                        lineNumber: 539,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 477,
+                                lineNumber: 535,
                                 columnNumber: 13
                             }, this),
                             showDeptForm && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1421,7 +1572,7 @@ function AdminPanel() {
                                                 children: "Department Name"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 491,
+                                                lineNumber: 549,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1439,13 +1590,13 @@ function AdminPanel() {
                                                     })
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 492,
+                                                lineNumber: 550,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 490,
+                                        lineNumber: 548,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1458,7 +1609,7 @@ function AdminPanel() {
                                                 children: "Capacity"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 498,
+                                                lineNumber: 556,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1477,13 +1628,13 @@ function AdminPanel() {
                                                     })
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 499,
+                                                lineNumber: 557,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 497,
+                                        lineNumber: 555,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1492,7 +1643,7 @@ function AdminPanel() {
                                         children: "Add"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 504,
+                                        lineNumber: 562,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1504,20 +1655,20 @@ function AdminPanel() {
                                         children: "Cancel"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 505,
+                                        lineNumber: 563,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 488,
+                                lineNumber: 546,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",
                                 children: [
                                     departments.map((dept)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow animate-slide-in",
+                                            className: "rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow",
                                             style: {
                                                 background: 'var(--card)',
                                                 borderColor: 'var(--border)'
@@ -1536,7 +1687,7 @@ function AdminPanel() {
                                                                     children: dept.name
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 515,
+                                                                    lineNumber: 573,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1544,13 +1695,13 @@ function AdminPanel() {
                                                                     children: dept.status
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 516,
+                                                                    lineNumber: 574,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 514,
+                                                            lineNumber: 572,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1560,18 +1711,18 @@ function AdminPanel() {
                                                                 size: 15
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 521,
+                                                                lineNumber: 579,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 520,
+                                                            lineNumber: 578,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 513,
+                                                    lineNumber: 571,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1584,7 +1735,7 @@ function AdminPanel() {
                                                             size: 13
                                                         }, void 0, false, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 525,
+                                                            lineNumber: 583,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1597,26 +1748,26 @@ function AdminPanel() {
                                                                     children: dept.capacity
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 526,
+                                                                    lineNumber: 584,
                                                                     columnNumber: 37
                                                                 }, this),
                                                                 " patients"
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 526,
+                                                            lineNumber: 584,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 524,
+                                                    lineNumber: 582,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, dept.id, true, {
                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                            lineNumber: 511,
+                                            lineNumber: 569,
                                             columnNumber: 17
                                         }, this)),
                                     departments.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1627,26 +1778,26 @@ function AdminPanel() {
                                         children: "No departments added yet"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 531,
+                                        lineNumber: 589,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 509,
+                                lineNumber: 567,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/admin/page.tsx",
-                        lineNumber: 476,
+                        lineNumber: 534,
                         columnNumber: 11
                     }, this),
                     activeTab === 'rooms' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "space-y-4 animate-fade-in",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "flex justify-between items-center",
+                                className: "flex justify-between items-center flex-wrap gap-3",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
                                         className: "text-lg font-semibold",
@@ -1663,52 +1814,98 @@ function AdminPanel() {
                                                 children: [
                                                     "(",
                                                     rooms.length,
-                                                    ")"
+                                                    " total)"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 542,
-                                                columnNumber: 20
+                                                lineNumber: 600,
+                                                columnNumber: 28
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 541,
-                                        columnNumber: 7
+                                        lineNumber: 599,
+                                        columnNumber: 15
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        onClick: ()=>setShowRoomForm(!showRoomForm),
-                                        className: "flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition",
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "flex gap-2 items-center flex-wrap",
                                         children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__["Plus"], {
-                                                size: 15
-                                            }, void 0, false, {
+                                            [
+                                                'all',
+                                                'open',
+                                                'occupied',
+                                                'cleaning'
+                                            ].map((f)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                    onClick: ()=>setRoomFilter(f),
+                                                    className: `text-xs px-3 py-1.5 rounded-lg border capitalize font-medium transition ${roomFilter === f ? 'bg-blue-600 text-white border-blue-600' : 'hover:opacity-80'}`,
+                                                    style: roomFilter === f ? {} : {
+                                                        borderColor: 'var(--border)',
+                                                        color: 'var(--muted)',
+                                                        background: 'var(--background)'
+                                                    },
+                                                    children: [
+                                                        f,
+                                                        " ",
+                                                        f !== 'all' && `(${rooms.filter((r)=>r.status === f).length})`
+                                                    ]
+                                                }, f, true, {
+                                                    fileName: "[project]/frontend/app/admin/page.tsx",
+                                                    lineNumber: 604,
+                                                    columnNumber: 19
+                                                }, this)),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: ()=>setShowRoomForm(!showRoomForm),
+                                                className: "flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__["Plus"], {
+                                                        size: 15
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/frontend/app/admin/page.tsx",
+                                                        lineNumber: 614,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    " Add Room"
+                                                ]
+                                            }, void 0, true, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 546,
-                                                columnNumber: 9
-                                            }, this),
-                                            " Add Room"
+                                                lineNumber: 612,
+                                                columnNumber: 17
+                                            }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 544,
-                                        columnNumber: 7
+                                        lineNumber: 602,
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 540,
-                                columnNumber: 5
+                                lineNumber: 598,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                className: "w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                style: {
+                                    background: 'var(--card)',
+                                    borderColor: 'var(--border)',
+                                    color: 'var(--foreground)'
+                                },
+                                placeholder: "🔍 Search rooms by name, type, or department...",
+                                value: roomSearch,
+                                onChange: (e)=>setRoomSearch(e.target.value)
+                            }, void 0, false, {
+                                fileName: "[project]/frontend/app/admin/page.tsx",
+                                lineNumber: 620,
+                                columnNumber: 13
                             }, this),
                             showRoomForm && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "rounded-xl border p-4 shadow-sm animate-slide-in flex gap-4 items-end flex-wrap",
+                                className: "rounded-xl border p-4 shadow-sm animate-slide-in grid grid-cols-1 md:grid-cols-3 gap-4",
                                 style: {
                                     background: 'var(--card)',
                                     borderColor: 'var(--border)'
                                 },
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "flex-1 min-w-40",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                                 className: "text-xs font-medium",
@@ -1718,8 +1915,8 @@ function AdminPanel() {
                                                 children: "Room Name"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 554,
-                                                columnNumber: 11
+                                                lineNumber: 632,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 className: "w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
@@ -1736,14 +1933,58 @@ function AdminPanel() {
                                                     })
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 555,
-                                                columnNumber: 11
+                                                lineNumber: 633,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 553,
-                                        columnNumber: 9
+                                        lineNumber: 631,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                className: "text-xs font-medium",
+                                                style: {
+                                                    color: 'var(--muted)'
+                                                },
+                                                children: "Department"
+                                            }, void 0, false, {
+                                                fileName: "[project]/frontend/app/admin/page.tsx",
+                                                lineNumber: 639,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                                className: "w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                                style: {
+                                                    background: 'var(--background)',
+                                                    borderColor: 'var(--border)',
+                                                    color: 'var(--foreground)'
+                                                },
+                                                value: roomForm.department,
+                                                onChange: (e)=>setRoomForm({
+                                                        ...roomForm,
+                                                        department: e.target.value,
+                                                        type: departmentTypeMap[e.target.value]?.[0]?.value ?? 'triage'
+                                                    }),
+                                                children: Object.keys(departmentTypeMap).map((dept)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                        children: dept
+                                                    }, dept, false, {
+                                                        fileName: "[project]/frontend/app/admin/page.tsx",
+                                                        lineNumber: 645,
+                                                        columnNumber: 23
+                                                    }, this))
+                                            }, void 0, false, {
+                                                fileName: "[project]/frontend/app/admin/page.tsx",
+                                                lineNumber: 640,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/frontend/app/admin/page.tsx",
+                                        lineNumber: 638,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         children: [
@@ -1755,8 +1996,8 @@ function AdminPanel() {
                                                 children: "Type"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 561,
-                                                columnNumber: 11
+                                                lineNumber: 650,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
                                                 className: "w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
@@ -1770,143 +2011,60 @@ function AdminPanel() {
                                                         ...roomForm,
                                                         type: e.target.value
                                                     }),
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        value: "triage",
-                                                        children: "Triage Hub"
-                                                    }, void 0, false, {
+                                                children: (departmentTypeMap[roomForm.department] ?? []).map((t)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                        value: t.value,
+                                                        children: t.label
+                                                    }, t.value, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 565,
-                                                        columnNumber: 13
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        value: "diagnostic",
-                                                        children: "Diagnostic Node"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 566,
-                                                        columnNumber: 13
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        value: "treatment",
-                                                        children: "Treatment Zone"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 567,
-                                                        columnNumber: 13
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        value: "discharge",
-                                                        children: "Discharge Lounge"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 568,
-                                                        columnNumber: 13
-                                                    }, this)
-                                                ]
-                                            }, void 0, true, {
+                                                        lineNumber: 655,
+                                                        columnNumber: 23
+                                                    }, this))
+                                            }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 562,
-                                                columnNumber: 11
+                                                lineNumber: 651,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 560,
-                                        columnNumber: 9
+                                        lineNumber: 649,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "md:col-span-3 flex gap-2",
                                         children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                                                className: "text-xs font-medium",
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: addRoom,
+                                                className: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition",
+                                                children: "Add Room"
+                                            }, void 0, false, {
+                                                fileName: "[project]/frontend/app/admin/page.tsx",
+                                                lineNumber: 660,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: ()=>setShowRoomForm(false),
+                                                className: "text-sm px-3 py-2 rounded-lg hover:opacity-70 transition",
                                                 style: {
                                                     color: 'var(--muted)'
                                                 },
-                                                children: "Department"
+                                                children: "Cancel"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 572,
-                                                columnNumber: 11
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                                className: "w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                                style: {
-                                                    background: 'var(--background)',
-                                                    borderColor: 'var(--border)',
-                                                    color: 'var(--foreground)'
-                                                },
-                                                value: roomForm.department,
-                                                onChange: (e)=>setRoomForm({
-                                                        ...roomForm,
-                                                        department: e.target.value
-                                                    }),
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        children: "Triage"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 576,
-                                                        columnNumber: 13
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        children: "Diagnostics"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 577,
-                                                        columnNumber: 13
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        children: "Treatment"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 578,
-                                                        columnNumber: 13
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                        children: "Discharge"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 579,
-                                                        columnNumber: 13
-                                                    }, this)
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 573,
-                                                columnNumber: 11
+                                                lineNumber: 661,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 571,
-                                        columnNumber: 9
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        onClick: addRoom,
-                                        className: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition",
-                                        children: "Add"
-                                    }, void 0, false, {
-                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 582,
-                                        columnNumber: 9
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        onClick: ()=>setShowRoomForm(false),
-                                        className: "text-sm px-3 py-2 rounded-lg hover:opacity-70 transition",
-                                        style: {
-                                            color: 'var(--muted)'
-                                        },
-                                        children: "Cancel"
-                                    }, void 0, false, {
-                                        fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 583,
-                                        columnNumber: 9
+                                        lineNumber: 659,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 551,
-                                columnNumber: 7
+                                lineNumber: 629,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-3 gap-4",
@@ -1938,8 +2096,8 @@ function AdminPanel() {
                                                 children: s.count
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 596,
-                                                columnNumber: 11
+                                                lineNumber: 675,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-sm font-medium",
@@ -1949,24 +2107,24 @@ function AdminPanel() {
                                                 children: s.label
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 597,
-                                                columnNumber: 11
+                                                lineNumber: 676,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, s.label, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 594,
-                                        columnNumber: 9
+                                        lineNumber: 673,
+                                        columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 588,
-                                columnNumber: 5
+                                lineNumber: 667,
+                                columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",
                                 children: [
-                                    rooms.map((room)=>{
+                                    filteredRooms.map((room)=>{
                                         const statusConfig = {
                                             open: {
                                                 color: 'bg-emerald-100 text-emerald-700',
@@ -1983,7 +2141,7 @@ function AdminPanel() {
                                         };
                                         const s = statusConfig[room.status] ?? statusConfig.open;
                                         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow animate-slide-in",
+                                            className: "rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow",
                                             style: {
                                                 background: 'var(--card)',
                                                 borderColor: 'var(--border)'
@@ -2002,29 +2160,29 @@ function AdminPanel() {
                                                                     children: room.name
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 616,
-                                                                    columnNumber: 17
+                                                                    lineNumber: 695,
+                                                                    columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                                    className: "text-xs capitalize",
+                                                                    className: "text-xs",
                                                                     style: {
                                                                         color: 'var(--muted)'
                                                                     },
                                                                     children: [
-                                                                        room.type.replace('_', ' '),
+                                                                        roomTypeLabels[room.type] ?? room.type,
                                                                         " · ",
                                                                         room.department
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 617,
-                                                                    columnNumber: 17
+                                                                    lineNumber: 696,
+                                                                    columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 615,
-                                                            columnNumber: 15
+                                                            lineNumber: 694,
+                                                            columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                             onClick: ()=>deleteRoom(room.id),
@@ -2033,19 +2191,19 @@ function AdminPanel() {
                                                                 size: 15
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 620,
-                                                                columnNumber: 17
+                                                                lineNumber: 701,
+                                                                columnNumber: 25
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 619,
-                                                            columnNumber: 15
+                                                            lineNumber: 700,
+                                                            columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 614,
-                                                    columnNumber: 13
+                                                    lineNumber: 693,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     className: "flex items-center gap-2 mb-4",
@@ -2056,20 +2214,20 @@ function AdminPanel() {
                                                                 className: `w-1.5 h-1.5 rounded-full ${s.dot}`
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 625,
-                                                                columnNumber: 17
+                                                                lineNumber: 706,
+                                                                columnNumber: 25
                                                             }, this),
                                                             room.status
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 624,
-                                                        columnNumber: 15
+                                                        lineNumber: 705,
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 623,
-                                                    columnNumber: 13
+                                                    lineNumber: 704,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     className: "flex gap-2 flex-wrap",
@@ -2080,8 +2238,7 @@ function AdminPanel() {
                                                     ].map((st)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                             onClick: ()=>updateRoomStatus(room.id, st),
                                                             disabled: room.status === st,
-                                                            className: `text-xs px-2 py-1 rounded-lg border transition capitalize font-medium
-                    ${room.status === st ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-80'}`,
+                                                            className: `text-xs px-2 py-1 rounded-lg border transition capitalize font-medium ${room.status === st ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-80'}`,
                                                             style: {
                                                                 borderColor: 'var(--border)',
                                                                 color: 'var(--muted)',
@@ -2090,43 +2247,43 @@ function AdminPanel() {
                                                             children: st
                                                         }, st, false, {
                                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                                            lineNumber: 631,
-                                                            columnNumber: 17
+                                                            lineNumber: 712,
+                                                            columnNumber: 25
                                                         }, this))
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 629,
-                                                    columnNumber: 13
+                                                    lineNumber: 710,
+                                                    columnNumber: 21
                                                 }, this)
                                             ]
                                         }, room.id, true, {
                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                            lineNumber: 612,
-                                            columnNumber: 11
+                                            lineNumber: 691,
+                                            columnNumber: 19
                                         }, this);
                                     }),
-                                    rooms.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    filteredRooms.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "col-span-3 text-center py-10 text-sm italic",
                                         style: {
                                             color: 'var(--muted)'
                                         },
-                                        children: "No rooms added yet"
+                                        children: "No rooms found"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 647,
-                                        columnNumber: 9
+                                        lineNumber: 726,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 603,
-                                columnNumber: 5
+                                lineNumber: 682,
+                                columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/admin/page.tsx",
-                        lineNumber: 539,
-                        columnNumber: 3
+                        lineNumber: 597,
+                        columnNumber: 11
                     }, this),
                     activeTab === 'logs' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "space-y-4 animate-fade-in",
@@ -2150,13 +2307,13 @@ function AdminPanel() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                        lineNumber: 659,
+                                        lineNumber: 738,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 658,
+                                lineNumber: 737,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2187,17 +2344,17 @@ function AdminPanel() {
                                                         children: h
                                                     }, h, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 666,
+                                                        lineNumber: 745,
                                                         columnNumber: 23
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                lineNumber: 664,
+                                                lineNumber: 743,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                            lineNumber: 663,
+                                            lineNumber: 742,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -2218,12 +2375,12 @@ function AdminPanel() {
                                                                     children: log.action
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                    lineNumber: 674,
+                                                                    lineNumber: 753,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 673,
+                                                                lineNumber: 752,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2234,7 +2391,7 @@ function AdminPanel() {
                                                                 children: log.entity
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 678,
+                                                                lineNumber: 757,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2245,7 +2402,7 @@ function AdminPanel() {
                                                                 children: log.details
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 679,
+                                                                lineNumber: 758,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2256,13 +2413,13 @@ function AdminPanel() {
                                                                 children: new Date(log.createdAt).toLocaleString()
                                                             }, void 0, false, {
                                                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                                                lineNumber: 680,
+                                                                lineNumber: 759,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, log.id, true, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 672,
+                                                        lineNumber: 751,
                                                         columnNumber: 21
                                                     }, this)),
                                                 logs.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -2275,51 +2432,51 @@ function AdminPanel() {
                                                         children: "No logs yet"
                                                     }, void 0, false, {
                                                         fileName: "[project]/frontend/app/admin/page.tsx",
-                                                        lineNumber: 686,
+                                                        lineNumber: 765,
                                                         columnNumber: 25
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                                    lineNumber: 686,
+                                                    lineNumber: 765,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/frontend/app/admin/page.tsx",
-                                            lineNumber: 670,
+                                            lineNumber: 749,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/frontend/app/admin/page.tsx",
-                                    lineNumber: 662,
+                                    lineNumber: 741,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/admin/page.tsx",
-                                lineNumber: 661,
+                                lineNumber: 740,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/admin/page.tsx",
-                        lineNumber: 657,
+                        lineNumber: 736,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/frontend/app/admin/page.tsx",
-                lineNumber: 266,
+                lineNumber: 333,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/frontend/app/admin/page.tsx",
-        lineNumber: 209,
+        lineNumber: 284,
         columnNumber: 5
     }, this);
 }
-_s(AdminPanel, "cT/ngiETcqSOWZb4RBxI4+ocWz0=");
+_s(AdminPanel, "Z+9vXUXiV2WkXGOqlWoJ1X4ztkE=");
 _c = AdminPanel;
 var _c;
 __turbopack_context__.k.register(_c, "AdminPanel");

@@ -1,4 +1,2 @@
-{"timestamp":"00:00:01.761","source":"Server","level":"LOG","message":""}
-{"timestamp":"00:00:15.648","source":"Server","level":"ERROR","message":"(node:25576) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.\n(Use `node --trace-deprecation ...` to show where the warning was created)"}
-{"timestamp":"00:00:16.610","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
-{"timestamp":"00:00:25.206","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:00:01.686","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:18.751","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
