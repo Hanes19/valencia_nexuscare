@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API = 'http://localhost:4000';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,11 +35,9 @@ export default function LoginPage() {
         return;
       }
 
-      // Save token and user to localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Redirect based on role
       if (data.user.role === 'admin') {
         router.push('/admin');
       } else {
@@ -54,18 +52,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--background)' }}>
       <div className="w-full max-w-md">
-
-        {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>NexusCare</h1>
           <p className="text-sm" style={{ color: 'var(--muted)' }}>Hospital Flow Management System</p>
         </div>
 
-        {/* Card */}
         <div className="rounded-2xl border p-8 shadow-lg"
           style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
 
-          {/* Tabs */}
           <div className="flex rounded-xl p-1 mb-6" style={{ background: 'var(--background)' }}>
             {(['login', 'register'] as const).map(m => (
               <button key={m} onClick={() => { setMode(m); setError(''); }}
@@ -78,14 +72,12 @@ export default function LoginPage() {
             ))}
           </div>
 
-          {/* Error */}
           {error && (
             <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
 
-          {/* Form */}
           <div className="space-y-4">
             {mode === 'register' && (
               <div>
@@ -102,8 +94,7 @@ export default function LoginPage() {
 
             <div>
               <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Email</label>
-              <input
-                type="email"
+              <input type="email"
                 className="w-full mt-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                 placeholder="email@hospital.com"
@@ -115,8 +106,7 @@ export default function LoginPage() {
 
             <div>
               <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Password</label>
-              <input
-                type="password"
+              <input type="password"
                 className="w-full mt-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                 placeholder="••••••••"
@@ -134,8 +124,7 @@ export default function LoginPage() {
                     className="w-full mt-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                     value={form.role}
-                    onChange={e => setForm({ ...form, role: e.target.value })}
-                  >
+                    onChange={e => setForm({ ...form, role: e.target.value })}>
                     <option value="nurse">Nurse</option>
                     <option value="doctor">Doctor</option>
                     <option value="lab_tech">Lab Tech</option>
@@ -148,8 +137,7 @@ export default function LoginPage() {
                     className="w-full mt-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                     value={form.department}
-                    onChange={e => setForm({ ...form, department: e.target.value })}
-                  >
+                    onChange={e => setForm({ ...form, department: e.target.value })}>
                     <option>Triage</option>
                     <option>Diagnostics</option>
                     <option>Treatment</option>
@@ -159,16 +147,12 @@ export default function LoginPage() {
               </>
             )}
 
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-semibold transition mt-2"
-            >
+            <button onClick={handleSubmit} disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-semibold transition mt-2">
               {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
           </div>
 
-          {/* Footer */}
           <p className="text-center text-xs mt-6" style={{ color: 'var(--muted)' }}>
             NexusCare · Authorized Personnel Only
           </p>

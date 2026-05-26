@@ -4,7 +4,8 @@ import { Users, Activity, Stethoscope, CheckCircle2, AlertTriangle, Clock, Moon,
 import { io } from 'socket.io-client';
 import { getUser, getToken, logout, getRoleColumns, getRoleLabel } from './lib/auth';
 
-const socket = io('http://localhost:4000');
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const socket = io(API);
 
 type Priority = 'red' | 'yellow' | 'green';
 type Status = 'waiting' | 'in-triage' | 'in-diagnostics' | 'in-treatment' | 'in-discharge';
@@ -76,8 +77,6 @@ function PatientModal({ patient, rooms, onClose }: {
       <div className="rounded-2xl border shadow-2xl w-full max-w-md animate-slide-in"
         style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
         onClick={e => e.stopPropagation()}>
-
-        {/* Header */}
         <div className={`p-5 rounded-t-2xl border-l-4 ${p.border} ${p.bg}`}>
           <div className="flex justify-between items-start">
             <div>
@@ -92,8 +91,6 @@ function PatientModal({ patient, rooms, onClose }: {
             </button>
           </div>
         </div>
-
-        {/* Body */}
         <div className="p-5 space-y-4">
           {[
             { label: 'Current Status', value: statusLabels[patient.status] ?? patient.status },
@@ -107,8 +104,6 @@ function PatientModal({ patient, rooms, onClose }: {
               <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{item.value}</span>
             </div>
           ))}
-
-          {/* Room Assignment */}
           <div className="flex justify-between items-center py-2 border-b" style={{ borderColor: 'var(--border)' }}>
             <span className="text-sm" style={{ color: 'var(--muted)' }}>Assigned Room</span>
             {assignedRoom ? (
@@ -117,8 +112,6 @@ function PatientModal({ patient, rooms, onClose }: {
               <span className="text-sm italic" style={{ color: 'var(--muted)' }}>No room assigned</span>
             )}
           </div>
-
-          {/* Priority indicator */}
           <div className={`rounded-xl p-4 ${p.bg} border ${p.border}`}>
             <p className={`text-xs font-semibold ${p.text}`}>
               {patient.priority === 'red' && '🚨 Code Red — Immediate attention required'}
@@ -151,7 +144,6 @@ function PatientCard({ patient, onMove, onDischarge, userRole, rooms, onSelect }
     'in-discharge': 'Discharge',
   };
 
-
   const handleMove = (nextStatus: Status) => {
     const dept = departmentForStatus[nextStatus];
     const availableRooms = rooms.filter(r => r.department === dept && r.status === 'open');
@@ -181,7 +173,6 @@ function PatientCard({ patient, onMove, onDischarge, userRole, rooms, onSelect }
         <span>{waitMins}m waiting{waitMins > 30 ? ' ⚠️' : ''}</span>
       </div>
 
-      {/* Room Picker */}
       {showRoomPicker && (
         <div className="mb-3 p-2 rounded-lg border animate-slide-in"
           style={{ background: 'var(--background)', borderColor: 'var(--border)' }}>
@@ -280,34 +271,30 @@ export default function NexusDashboard() {
   }, []);
 
   const fetchPatients = useCallback(() => {
-    fetch('http://localhost:4000/api/patients')
+    fetch(`${API}/api/patients`)
       .then(res => res.json())
       .then(data => { setPatients(data); setDataLoaded(true); })
       .catch(err => console.error('Failed to fetch patients:', err));
   }, []);
 
   const fetchStats = useCallback(() => {
-    fetch('http://localhost:4000/api/stats')
+    fetch(`${API}/api/stats`)
       .then(res => res.json())
       .then(setStatsData)
       .catch(err => console.error('Failed to fetch stats:', err));
   }, []);
 
-const fetchRooms = useCallback(() => {
-  fetch('http://localhost:4000/api/rooms')
-    .then(r => { if (!r.ok) throw new Error(`rooms: ${r.status}`); return r.json(); })
-    .then(setRooms)
-    .catch(err => {
-      console.error('Failed to fetch rooms:', err);
-      // Retry after 3 seconds on failure
-      setTimeout(() => {
-        fetch('http://localhost:4000/api/rooms')
-          .then(r => r.json())
-          .then(setRooms)
-          .catch(console.error);
-      }, 3000);
-    });
-}, []);
+  const fetchRooms = useCallback(() => {
+    fetch(`${API}/api/rooms`)
+      .then(r => { if (!r.ok) throw new Error(`rooms: ${r.status}`); return r.json(); })
+      .then(setRooms)
+      .catch(err => {
+        console.error('Failed to fetch rooms:', err);
+        setTimeout(() => {
+          fetch(`${API}/api/rooms`).then(r => r.json()).then(setRooms).catch(console.error);
+        }, 3000);
+      });
+  }, []);
 
   useEffect(() => {
     fetchPatients();
@@ -320,12 +307,10 @@ const fetchRooms = useCallback(() => {
     socket.on('queue:emergency', ({ patient, message }: { patient: Patient; message: string }) => {
       setCodeRed(`🚨 ${message}: ${patient.name}`);
       setTimeout(() => setCodeRed(null), 6000);
-    socket.on('queue:alert', ({ patientId, message }: { patientId: string; message: string }) => {
-  console.warn('⚠️ Wait alert:', message);
-  // Flash a warning - reuse the codeRed banner but in amber
-  setCodeRed(`⚠️ ${message}`);
-  setTimeout(() => setCodeRed(null), 5000);
-});
+    });
+    socket.on('queue:alert', ({ message }: { patientId: string; message: string }) => {
+      setCodeRed(`⚠️ ${message}`);
+      setTimeout(() => setCodeRed(null), 5000);
     });
 
     return () => {
@@ -335,57 +320,53 @@ const fetchRooms = useCallback(() => {
       socket.off('queue:emergency');
       socket.off('queue:alert');
     };
-  }, [fetchPatients, fetchStats]);
+  }, [fetchPatients, fetchStats, fetchRooms]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
 
   const movePatient = async (id: string, status: Status, roomId?: string) => {
-  await fetch(`http://localhost:4000/api/patients/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
-
-  if (roomId) {
-    await fetch(`http://localhost:4000/api/rooms/${roomId}`, {
+    await fetch(`${API}/api/patients/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'occupied', currentPatientId: id }),
+      body: JSON.stringify({ status }),
     });
-    fetchRooms();
-  }
-};
-
-const dischargePatient = async (id: string) => {
-  const res = await fetch(`http://localhost:4000/api/patients/${id}`, { method: 'DELETE' });
-  if (!res.ok) return;
-
-  const assignedRoom = rooms.find(r => r.currentPatientId === id);
-  if (assignedRoom) {
-    await fetch(`http://localhost:4000/api/rooms/${assignedRoom.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'cleaning', currentPatientId: null }),
-    });
-
-    fetchRooms();
-
-    setTimeout(async () => {
-      await fetch(`http://localhost:4000/api/rooms/${assignedRoom.id}`, {
+    if (roomId) {
+      await fetch(`${API}/api/rooms/${roomId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'open' }),
+        body: JSON.stringify({ status: 'occupied', currentPatientId: id }),
       });
       fetchRooms();
-    }, 30000);
-  }
-};
+    }
+  };
+
+  const dischargePatient = async (id: string) => {
+    const res = await fetch(`${API}/api/patients/${id}`, { method: 'DELETE' });
+    if (!res.ok) return;
+    const assignedRoom = rooms.find(r => r.currentPatientId === id);
+    if (assignedRoom) {
+      await fetch(`${API}/api/rooms/${assignedRoom.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cleaning', currentPatientId: null }),
+      });
+      fetchRooms();
+      setTimeout(async () => {
+        await fetch(`${API}/api/rooms/${assignedRoom.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'open' }),
+        });
+        fetchRooms();
+      }, 30000);
+    }
+  };
 
   const admitPatient = async () => {
     if (!form.name.trim()) return;
-    await fetch('http://localhost:4000/api/patients', {
+    await fetch(`${API}/api/patients`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
@@ -415,23 +396,20 @@ const dischargePatient = async (id: string) => {
   return (
     <div className="min-h-screen p-4 md:p-6 transition-colors" style={{ background: 'var(--background)' }}>
 
-        {/* Code Red Banner */}
-        {codeRed && (
-          <div className="fixed top-0 left-0 right-0 z-50 animate-pulse-red text-white text-center py-3 font-bold text-base shadow-lg">
-            {codeRed}
-          </div>
-        )}
+      {codeRed && (
+        <div className="fixed top-0 left-0 right-0 z-50 animate-pulse-red text-white text-center py-3 font-bold text-base shadow-lg">
+          {codeRed}
+        </div>
+      )}
 
-        {/* Patient Detail Modal */}
-        {selectedPatient && (
-          <PatientModal
-            patient={selectedPatient}
-            rooms={rooms}
-            onClose={() => setSelectedPatient(null)}
-          />
-        )}
+      {selectedPatient && (
+        <PatientModal
+          patient={selectedPatient}
+          rooms={rooms}
+          onClose={() => setSelectedPatient(null)}
+        />
+      )}
 
-      {/* Header */}
       <header className="mb-6 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -489,7 +467,6 @@ const dischargePatient = async (id: string) => {
         </div>
       </header>
 
-      {/* Heatmap Stats Bar */}
       <div className="mb-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {heatmapDepts.map((dept) => {
           const load = Math.min((dept.count / dept.threshold) * 100, 100);
@@ -515,7 +492,6 @@ const dischargePatient = async (id: string) => {
         })}
       </div>
 
-      {/* Admit Form */}
       {showForm && isAdmin && (
         <div className="mb-6 rounded-xl border p-4 shadow-sm animate-slide-in flex gap-4 items-end flex-wrap"
           style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
@@ -536,8 +512,7 @@ const dischargePatient = async (id: string) => {
               className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               style={{ background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
               value={form.priority}
-              onChange={e => setForm({ ...form, priority: e.target.value })}
-            >
+              onChange={e => setForm({ ...form, priority: e.target.value })}>
               <option value="green">🟢 Stable</option>
               <option value="yellow">🟡 Urgent</option>
               <option value="red">🔴 Code Red</option>
@@ -554,7 +529,6 @@ const dischargePatient = async (id: string) => {
         </div>
       )}
 
-      {/* Role banner for non-admin */}
       {currentUser && !isAdmin && (
         <div className="mb-4 px-4 py-3 rounded-xl border text-sm font-medium"
           style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
@@ -563,7 +537,6 @@ const dischargePatient = async (id: string) => {
         </div>
       )}
 
-      {/* Kanban Board */}
       <div className={`grid grid-cols-1 gap-4 ${
         visibleColumns.length === 1 ? 'md:grid-cols-1 lg:grid-cols-1' :
         visibleColumns.length === 2 ? 'md:grid-cols-2 lg:grid-cols-2' :

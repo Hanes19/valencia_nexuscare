@@ -27,7 +27,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$
 ;
 ;
 ;
-const API = 'http://localhost:4000';
+const API = ("TURBOPACK compile-time value", "https://valencianexuscare-production.up.railway.app") || 'http://localhost:4000';
 const tabs = [
     {
         id: 'analytics',
