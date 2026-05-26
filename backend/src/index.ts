@@ -16,9 +16,24 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 const app = express();
 const server = createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://valencia-nexuscare.vercel.app',
+  'https://valencia-nexuscare-fnpnm6zt5-hanes19s-projects.vercel.app',
+];
 
-app.use(cors());
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    credentials: true,
+  }
+});
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json());
 
 // ─── Health Check ───────────────────────────────────────────────
