@@ -37,6 +37,8 @@ app.use(cors({
 
 app.options('/{*path}', cors());
 
+app.use(express.json());
+
 // ─── Health Check ───────────────────────────────────────────────
 app.get('/', (req, res) => {
     res.send('NexusCare API is online');
