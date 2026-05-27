@@ -24,17 +24,18 @@ const allowedOrigins = [
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-    credentials: true,
+    origin: '*',
+    methods: ['GET', 'POST'],
   }
 });
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
+  origin: '*',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json());
+
+app.options('*', cors());
 
 // ─── Health Check ───────────────────────────────────────────────
 app.get('/', (req, res) => {
