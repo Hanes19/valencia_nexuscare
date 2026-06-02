@@ -341,17 +341,18 @@ const filteredRooms = rooms
     <div className="min-h-screen transition-colors" style={{ background: 'var(--background)' }}>
 
       {/* Header */}
-      <header className="border-b px-6 py-4 flex items-center justify-between"
+      <header className="border-b px-4 md:px-6 py-3 flex items-center justify-between"
         style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-        <div className="flex items-center gap-4">
-          <a href="/" className="flex items-center gap-1.5 text-sm hover:opacity-70 transition"
+        <div className="flex items-center gap-3">
+          <a href="/" className="flex items-center gap-1 text-sm hover:opacity-70 transition"
             style={{ color: 'var(--muted)' }}>
-            <ArrowLeft size={16} /> Dashboard
+            <ArrowLeft size={16} />
+            <span className="hidden sm:inline">Dashboard</span>
           </a>
-          <div className="w-px h-5" style={{ background: 'var(--border)' }} />
+          <div className="w-px h-5 hidden sm:block" style={{ background: 'var(--border)' }} />
           <div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>NexusCare Admin</h1>
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>System Management Panel</p>
+            <h1 className="text-base md:text-xl font-bold" style={{ color: 'var(--foreground)' }}>NexusCare Admin</h1>
+            <p className="text-xs hidden sm:block" style={{ color: 'var(--muted)' }}>System Management Panel</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -369,18 +370,19 @@ const filteredRooms = rooms
       </header>
 
       {/* Tabs */}
-      <div className="border-b px-6" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-        <div className="flex gap-1">
+      <div className="border-b px-2 md:px-6 overflow-x-auto" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+        <div className="flex gap-1 min-w-max">
           {tabs.map(tab => {
             const Icon = tab.icon;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition ${
+                className={`flex items-center gap-1.5 px-3 py-3 text-xs font-medium border-b-2 transition whitespace-nowrap ${
                   activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent hover:opacity-80'
                 }`}
                 style={{ color: activeTab === tab.id ? undefined : 'var(--muted)' }}>
-                <Icon size={15} />
-                {tab.label}
+                <Icon size={14} />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
               </button>
             );
           })}
