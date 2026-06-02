@@ -394,7 +394,7 @@ export default function NexusDashboard() {
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'doctor';
 
   return (
-    <div className="min-h-screen p-4 md:p-6 transition-colors" style={{ background: 'var(--background)' }}>
+    <div className="min-h-screen p-3 md:p-6 transition-colors" style={{ background: 'var(--background)' }}>
 
       {codeRed && (
         <div className="fixed top-0 left-0 right-0 z-50 animate-pulse-red text-white text-center py-3 font-bold text-base shadow-lg">
@@ -410,80 +410,82 @@ export default function NexusDashboard() {
         />
       )}
 
-    <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
-            NexusCare
-          </h1>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-            connected || dataLoaded ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
-          }`}>
-            {connected || dataLoaded ? '● Live' : '○ Offline'}
-          </span>
+      {/* Header */}
+      <header className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+              NexusCare
+            </h1>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              connected || dataLoaded ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
+            }`}>
+              {connected || dataLoaded ? '● Live' : '○ Offline'}
+            </span>
+          </div>
+          <p className="text-sm" style={{ color: 'var(--muted)' }}>Hospital Flow Command Center</p>
         </div>
-        <p className="text-sm" style={{ color: 'var(--muted)' }}>Hospital Flow Command Center</p>
-      </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
-        {currentUser && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {currentUser && (
+            <div className="text-xs px-3 py-1.5 rounded-lg border font-medium"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+              👤 {currentUser.name} · {getRoleLabel(currentUser.role as any)}
+            </div>
+          )}
+          {statsData.byPriority.red > 0 && (
+            <div className="flex items-center gap-1.5 bg-red-100 border border-red-300 text-red-700 px-3 py-1.5 rounded-lg text-sm font-semibold animate-pulse">
+              <AlertTriangle size={14} />
+              {statsData.byPriority.red} Code Red
+            </div>
+          )}
           <div className="text-xs px-3 py-1.5 rounded-lg border font-medium"
             style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-            👤 {currentUser.name} · {getRoleLabel(currentUser.role as any)}
+            {statsData.total} patients
           </div>
-        )}
-        {statsData.byPriority.red > 0 && (
-          <div className="flex items-center gap-1.5 bg-red-100 border border-red-300 text-red-700 px-3 py-1.5 rounded-lg text-sm font-semibold animate-pulse">
-            <AlertTriangle size={14} />
-            {statsData.byPriority.red} Code Red
-          </div>
-        )}
-        <div className="text-xs px-3 py-1.5 rounded-lg border font-medium"
-          style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-          {statsData.total} patients
-        </div>
-        {isAdmin && (
-          <a href="/admin" className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium hover:opacity-80 transition"
+          {isAdmin && (
+            <a href="/admin" className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium hover:opacity-80 transition"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+              <Settings size={14} /> Admin
+            </a>
+          )}
+          <button onClick={() => logout()}
+            className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
             style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-            <Settings size={14} /> Admin
-          </a>
-        )}
-        <button onClick={() => logout()}
-          className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 transition"
-          style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-          Logout
-        </button>
-        <button onClick={() => setDark(!dark)}
-          className="p-2 rounded-lg border hover:opacity-80 transition"
-          style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-          {dark ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-        {isAdmin && (
-          <button onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm">
-            + Admit
+            Logout
           </button>
-        )}
-      </div>
-    </header>
+          <button onClick={() => setDark(!dark)}
+            className="p-2 rounded-lg border hover:opacity-80 transition"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+            {dark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          {isAdmin && (
+            <button onClick={() => setShowForm(!showForm)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm">
+              + Admit
+            </button>
+          )}
+        </div>
+      </header>
 
-      <div className="mb-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+      {/* Heatmap Stats Bar */}
+      <div className="mb-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {heatmapDepts.map((dept) => {
           const load = Math.min((dept.count / dept.threshold) * 100, 100);
           const heat = load >= 100 ? 'bg-red-500' : load >= 60 ? 'bg-amber-400' : 'bg-emerald-400';
           const textHeat = load >= 100 ? 'text-red-500' : load >= 60 ? 'text-amber-500' : 'text-emerald-500';
           const status = load >= 100 ? '🔴 Full' : load >= 60 ? '🟡 Busy' : '🟢 Clear';
           return (
-            <div key={dept.label} className="rounded-xl border p-4 shadow-sm hover:shadow-md transition-shadow"
+            <div key={dept.label} className="rounded-xl border p-3 shadow-sm"
               style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>{dept.label}</span>
                 <span className={`text-xs font-bold ${textHeat}`}>{status}</span>
               </div>
-              <div className="w-full rounded-full h-1.5 mb-3" style={{ background: 'var(--border)' }}>
+              <div className="w-full rounded-full h-1.5 mb-2" style={{ background: 'var(--border)' }}>
                 <div className={`h-1.5 rounded-full transition-all duration-700 ${heat}`} style={{ width: `${load}%` }} />
               </div>
-              <p className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+              <p className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>
                 {dept.count}
                 <span className="text-xs font-normal ml-1" style={{ color: 'var(--muted)' }}>/ {dept.threshold}</span>
               </p>
@@ -492,10 +494,11 @@ export default function NexusDashboard() {
         })}
       </div>
 
+      {/* Admit Form */}
       {showForm && isAdmin && (
-        <div className="mb-6 rounded-xl border p-4 shadow-sm animate-slide-in flex gap-4 items-end flex-wrap"
+        <div className="mb-4 rounded-xl border p-4 shadow-sm animate-slide-in flex gap-3 items-end flex-wrap"
           style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-          <div className="flex-1 min-w-40">
+          <div className="flex-1 min-w-36">
             <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Patient Name</label>
             <input
               className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -529,6 +532,7 @@ export default function NexusDashboard() {
         </div>
       )}
 
+      {/* Role banner */}
       {currentUser && !isAdmin && (
         <div className="mb-4 px-4 py-3 rounded-xl border text-sm font-medium"
           style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
@@ -537,52 +541,52 @@ export default function NexusDashboard() {
         </div>
       )}
 
-    {/* Kanban Board */}
-    <div className={`grid grid-cols-1 gap-4 ${
-      visibleColumns.length === 1 ? 'md:grid-cols-1' :
-      visibleColumns.length === 2 ? 'md:grid-cols-2' :
-      visibleColumns.length === 3 ? 'md:grid-cols-3' :
-      'md:grid-cols-2 lg:grid-cols-5'
-    }`}>
-      {visibleColumns.map((col) => {
-        const Icon = col.icon;
-        const colPatients = patients.filter(p => p.status === col.id);
-        const isBusy = colPatients.length >= 3;
-        return (
-          <div key={col.id} className="flex flex-col rounded-xl border shadow-sm min-h-[300px] md:h-[62vh]"
-            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-            <div className={`p-3 ${col.color} text-white rounded-t-xl flex items-center justify-between`}>
-              <div className="flex items-center gap-2">
-                <Icon size={16} />
-                <h2 className="font-semibold text-sm">{col.title}</h2>
-              </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${isBusy ? 'bg-red-500/30' : 'bg-white/20'}`}>
-                {colPatients.length}
-              </span>
-            </div>
-            <div className="p-3 flex-1 overflow-y-auto">
-              {colPatients.length === 0 ? (
-                <div className="text-center mt-10">
-                  <p className="text-xs italic" style={{ color: 'var(--muted)' }}>No patients</p>
+      {/* Kanban Board */}
+      <div className={`grid grid-cols-1 gap-4 ${
+        visibleColumns.length === 1 ? 'md:grid-cols-1' :
+        visibleColumns.length === 2 ? 'md:grid-cols-2' :
+        visibleColumns.length === 3 ? 'md:grid-cols-3' :
+        'md:grid-cols-2 lg:grid-cols-5'
+      }`}>
+        {visibleColumns.map((col) => {
+          const Icon = col.icon;
+          const colPatients = patients.filter(p => p.status === col.id);
+          const isBusy = colPatients.length >= 3;
+          return (
+            <div key={col.id} className="flex flex-col rounded-xl border shadow-sm min-h-[250px] md:h-[60vh]"
+              style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+              <div className={`p-3 ${col.color} text-white rounded-t-xl flex items-center justify-between`}>
+                <div className="flex items-center gap-2">
+                  <Icon size={16} />
+                  <h2 className="font-semibold text-sm">{col.title}</h2>
                 </div>
-              ) : (
-                colPatients.map(patient => (
-                  <PatientCard
-                    key={patient.id}
-                    patient={patient}
-                    onMove={movePatient}
-                    onDischarge={dischargePatient}
-                    userRole={currentUser?.role || 'admin'}
-                    rooms={rooms}
-                    onSelect={setSelectedPatient}
-                  />
-                ))
-              )}
+                <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${isBusy ? 'bg-red-500/30' : 'bg-white/20'}`}>
+                  {colPatients.length}
+                </span>
+              </div>
+              <div className="p-3 flex-1 overflow-y-auto">
+                {colPatients.length === 0 ? (
+                  <div className="text-center mt-10">
+                    <p className="text-xs italic" style={{ color: 'var(--muted)' }}>No patients</p>
+                  </div>
+                ) : (
+                  colPatients.map(patient => (
+                    <PatientCard
+                      key={patient.id}
+                      patient={patient}
+                      onMove={movePatient}
+                      onDischarge={dischargePatient}
+                      userRole={currentUser?.role || 'admin'}
+                      rooms={rooms}
+                      onSelect={setSelectedPatient}
+                    />
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
