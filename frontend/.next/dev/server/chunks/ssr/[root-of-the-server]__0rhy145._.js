@@ -921,7 +921,7 @@ function NexusDashboard() {
     const heatmapDepts = allHeatmapDepts.filter((d)=>currentUser ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$app$2f$lib$2f$auth$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getRoleColumns"])(currentUser.role).includes(d.id) : true);
     const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'doctor';
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "min-h-screen p-4 md:p-6 transition-colors",
+        className: "min-h-screen p-3 md:p-6 transition-colors",
         style: {
             background: 'var(--background)'
         },
@@ -944,7 +944,7 @@ function NexusDashboard() {
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("header", {
-                className: "mb-6 flex items-center justify-between gap-4 flex-wrap",
+                className: "mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         children: [
@@ -952,14 +952,14 @@ function NexusDashboard() {
                                 className: "flex items-center gap-2 mb-1",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                        className: "text-2xl md:text-3xl font-bold",
+                                        className: "text-2xl font-bold",
                                         style: {
                                             color: 'var(--foreground)'
                                         },
                                         children: "NexusCare"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 416,
+                                        lineNumber: 417,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -967,13 +967,13 @@ function NexusDashboard() {
                                         children: connected || dataLoaded ? '● Live' : '○ Offline'
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 419,
+                                        lineNumber: 420,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 415,
+                                lineNumber: 416,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -984,13 +984,13 @@ function NexusDashboard() {
                                 children: "Hospital Flow Command Center"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 425,
+                                lineNumber: 426,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 414,
+                        lineNumber: 415,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1011,7 +1011,7 @@ function NexusDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 430,
+                                lineNumber: 431,
                                 columnNumber: 13
                             }, this),
                             statsData.byPriority.red > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1021,7 +1021,7 @@ function NexusDashboard() {
                                         size: 14
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 437,
+                                        lineNumber: 438,
                                         columnNumber: 15
                                     }, this),
                                     statsData.byPriority.red,
@@ -1029,7 +1029,7 @@ function NexusDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 436,
+                                lineNumber: 437,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1045,7 +1045,7 @@ function NexusDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 441,
+                                lineNumber: 442,
                                 columnNumber: 11
                             }, this),
                             isAdmin && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -1061,14 +1061,14 @@ function NexusDashboard() {
                                         size: 14
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 448,
+                                        lineNumber: 449,
                                         columnNumber: 15
                                     }, this),
                                     " Admin"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 446,
+                                lineNumber: 447,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1082,7 +1082,7 @@ function NexusDashboard() {
                                 children: "Logout"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 451,
+                                lineNumber: 452,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1097,50 +1097,50 @@ function NexusDashboard() {
                                     size: 16
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/app/page.tsx",
-                                    lineNumber: 459,
+                                    lineNumber: 460,
                                     columnNumber: 21
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$moon$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Moon$3e$__["Moon"], {
                                     size: 16
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/app/page.tsx",
-                                    lineNumber: 459,
+                                    lineNumber: 460,
                                     columnNumber: 41
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 456,
+                                lineNumber: 457,
                                 columnNumber: 11
                             }, this),
                             isAdmin && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                 onClick: ()=>setShowForm(!showForm),
                                 className: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm",
-                                children: "+ Admit Patient"
+                                children: "+ Admit"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 462,
+                                lineNumber: 463,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 428,
+                        lineNumber: 429,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/frontend/app/page.tsx",
-                lineNumber: 413,
+                lineNumber: 414,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "mb-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3",
+                className: "mb-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3",
                 children: heatmapDepts.map((dept)=>{
                     const load = Math.min(dept.count / dept.threshold * 100, 100);
                     const heat = load >= 100 ? 'bg-red-500' : load >= 60 ? 'bg-amber-400' : 'bg-emerald-400';
                     const textHeat = load >= 100 ? 'text-red-500' : load >= 60 ? 'text-amber-500' : 'text-emerald-500';
                     const status = load >= 100 ? '🔴 Full' : load >= 60 ? '🟡 Busy' : '🟢 Clear';
                     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "rounded-xl border p-4 shadow-sm hover:shadow-md transition-shadow",
+                        className: "rounded-xl border p-3 shadow-sm",
                         style: {
                             background: 'var(--card)',
                             borderColor: 'var(--border)'
@@ -1157,7 +1157,7 @@ function NexusDashboard() {
                                         children: dept.label
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 480,
+                                        lineNumber: 482,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1165,17 +1165,17 @@ function NexusDashboard() {
                                         children: status
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 481,
+                                        lineNumber: 483,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 479,
+                                lineNumber: 481,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "w-full rounded-full h-1.5 mb-3",
+                                className: "w-full rounded-full h-1.5 mb-2",
                                 style: {
                                     background: 'var(--border)'
                                 },
@@ -1186,16 +1186,16 @@ function NexusDashboard() {
                                     }
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/app/page.tsx",
-                                    lineNumber: 484,
+                                    lineNumber: 486,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 483,
+                                lineNumber: 485,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-2xl font-bold",
+                                className: "text-xl font-bold",
                                 style: {
                                     color: 'var(--foreground)'
                                 },
@@ -1212,36 +1212,36 @@ function NexusDashboard() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 488,
+                                        lineNumber: 490,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 486,
+                                lineNumber: 488,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, dept.label, true, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 477,
+                        lineNumber: 479,
                         columnNumber: 13
                     }, this);
                 })
             }, void 0, false, {
                 fileName: "[project]/frontend/app/page.tsx",
-                lineNumber: 470,
+                lineNumber: 472,
                 columnNumber: 7
             }, this),
             showForm && isAdmin && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "mb-6 rounded-xl border p-4 shadow-sm animate-slide-in flex gap-4 items-end flex-wrap",
+                className: "mb-4 rounded-xl border p-4 shadow-sm animate-slide-in flex gap-3 items-end flex-wrap",
                 style: {
                     background: 'var(--card)',
                     borderColor: 'var(--border)'
                 },
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "flex-1 min-w-40",
+                        className: "flex-1 min-w-36",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                 className: "text-xs font-medium",
@@ -1251,7 +1251,7 @@ function NexusDashboard() {
                                 children: "Patient Name"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 499,
+                                lineNumber: 502,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1270,13 +1270,13 @@ function NexusDashboard() {
                                 onKeyDown: (e)=>e.key === 'Enter' && admitPatient()
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 500,
+                                lineNumber: 503,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 498,
+                        lineNumber: 501,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1289,7 +1289,7 @@ function NexusDashboard() {
                                 children: "Priority"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 510,
+                                lineNumber: 513,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -1310,7 +1310,7 @@ function NexusDashboard() {
                                         children: "🟢 Stable"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 516,
+                                        lineNumber: 519,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -1318,7 +1318,7 @@ function NexusDashboard() {
                                         children: "🟡 Urgent"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 517,
+                                        lineNumber: 520,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -1326,19 +1326,19 @@ function NexusDashboard() {
                                         children: "🔴 Code Red"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 518,
+                                        lineNumber: 521,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 511,
+                                lineNumber: 514,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 509,
+                        lineNumber: 512,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1347,7 +1347,7 @@ function NexusDashboard() {
                         children: "Admit"
                     }, void 0, false, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 521,
+                        lineNumber: 524,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1359,13 +1359,13 @@ function NexusDashboard() {
                         children: "Cancel"
                     }, void 0, false, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 525,
+                        lineNumber: 528,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/frontend/app/page.tsx",
-                lineNumber: 496,
+                lineNumber: 499,
                 columnNumber: 9
             }, this),
             currentUser && !isAdmin && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1384,24 +1384,24 @@ function NexusDashboard() {
                         children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$app$2f$lib$2f$auth$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getRoleLabel"])(currentUser.role)
                     }, void 0, false, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 535,
+                        lineNumber: 539,
                         columnNumber: 25
                     }, this),
                     currentUser.department && ` — ${currentUser.department} Department`
                 ]
             }, void 0, true, {
                 fileName: "[project]/frontend/app/page.tsx",
-                lineNumber: 533,
+                lineNumber: 537,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: `grid grid-cols-1 gap-4 ${visibleColumns.length === 1 ? 'md:grid-cols-1 lg:grid-cols-1' : visibleColumns.length === 2 ? 'md:grid-cols-2 lg:grid-cols-2' : visibleColumns.length === 3 ? 'md:grid-cols-3 lg:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-5'}`,
+                className: `grid grid-cols-1 gap-4 ${visibleColumns.length === 1 ? 'md:grid-cols-1' : visibleColumns.length === 2 ? 'md:grid-cols-2' : visibleColumns.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-5'}`,
                 children: visibleColumns.map((col)=>{
                     const Icon = col.icon;
                     const colPatients = patients.filter((p)=>p.status === col.id);
                     const isBusy = colPatients.length >= 3;
                     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "flex flex-col rounded-xl border shadow-sm h-[62vh]",
+                        className: "flex flex-col rounded-xl border shadow-sm min-h-[250px] md:h-[60vh]",
                         style: {
                             background: 'var(--card)',
                             borderColor: 'var(--border)'
@@ -1417,7 +1417,7 @@ function NexusDashboard() {
                                                 size: 16
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/page.tsx",
-                                                lineNumber: 555,
+                                                lineNumber: 560,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -1425,13 +1425,13 @@ function NexusDashboard() {
                                                 children: col.title
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/app/page.tsx",
-                                                lineNumber: 556,
+                                                lineNumber: 561,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 554,
+                                        lineNumber: 559,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1439,13 +1439,13 @@ function NexusDashboard() {
                                         children: colPatients.length
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 558,
+                                        lineNumber: 563,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 553,
+                                lineNumber: 558,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1460,12 +1460,12 @@ function NexusDashboard() {
                                         children: "No patients"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 565,
+                                        lineNumber: 570,
                                         columnNumber: 21
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/app/page.tsx",
-                                    lineNumber: 564,
+                                    lineNumber: 569,
                                     columnNumber: 19
                                 }, this) : colPatients.map((patient)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(PatientCard, {
                                         patient: patient,
@@ -1476,24 +1476,24 @@ function NexusDashboard() {
                                         onSelect: setSelectedPatient
                                     }, patient.id, false, {
                                         fileName: "[project]/frontend/app/page.tsx",
-                                        lineNumber: 569,
+                                        lineNumber: 574,
                                         columnNumber: 21
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/frontend/app/page.tsx",
-                                lineNumber: 562,
+                                lineNumber: 567,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, col.id, true, {
                         fileName: "[project]/frontend/app/page.tsx",
-                        lineNumber: 551,
+                        lineNumber: 556,
                         columnNumber: 13
                     }, this);
                 })
             }, void 0, false, {
                 fileName: "[project]/frontend/app/page.tsx",
-                lineNumber: 540,
+                lineNumber: 545,
                 columnNumber: 7
             }, this)
         ]

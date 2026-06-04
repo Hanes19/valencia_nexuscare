@@ -265,6 +265,22 @@ app.get('/api/staff', async (req, res) => {
     res.json(staff);
 });
 
+
+app.get('/api/staff/:id', async (req, res) => {
+    try {
+        const staff = await prisma.staff.findUnique({
+            where: { id: req.params.id }
+        });
+        if (!staff) {
+            return res.status(404).json({ error: 'Staff member not found' });
+        }
+        res.json(staff);
+    } catch (error) {
+        console.error("Error fetching staff member:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.post('/api/staff', async (req, res) => {
     const { name, email, role, department } = req.body;
     if (!name || !email || !role || !department) {
