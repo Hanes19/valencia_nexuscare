@@ -270,29 +270,47 @@ app.post('/api/staff', async (req, res) => {
     if (!name || !email || !role || !department) {
         return res.status(400).json({ error: 'name, email, role, and department are required' });
     }
-    const staff = await prisma.staff.create({ data: { name, email, role, department } });
-    await prisma.auditLog.create({ data: { action: 'CREATED', entity: 'Staff', entityId: staff.id, details: `${name} added as ${role}` } });
-    res.status(201).json(staff);
-});
 
-app.patch('/api/staff/:id', async (req, res) => {
-    const { name, email, role, department, status } = req.body;
-    const staff = await prisma.staff.update({
-        where: { id: req.params.id },
-        data: { ...(name && { name }), ...(email && { email }), ...(role && { role }), ...(department && { department }), ...(status && { status }) }
-    });
-    await prisma.auditLog.create({ data: { action: 'UPDATED', entity: 'Staff', entityId: staff.id, details: `${staff.name} updated` } });
-    res.json(staff);
-});
+    try {
+        // 1. Check if a user with this email already exists to prevent crashes
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'An account with this email already exists' });
+        }
 
-app.delete('/api/staff/:id', async (req, res) => {
-    const staff = await prisma.staff.findUnique({ where: { id: req.params.id } });
-    if (!staff) return res.status(404).json({ error: 'Staff not found' });
-    await prisma.staff.delete({ where: { id: req.params.id } });
-    await prisma.auditLog.create({ data: { action: 'DELETED', entity: 'Staff', entityId: req.params.id, details: `${staff.name} removed` } });
-    res.json({ message: 'Staff removed' });
-});
+        // 2. Create the purely administrative Staff record
+        const staff = await prisma.staff.create({ data: { name, email, role, department } });
+        
+        // 3. Automatically generate the User login account with a default password
+        const defaultPassword = 'Welcome123!';
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+        
+        await prisma.user.create({
+            data: { 
+                name, 
+                email, 
+                password: hashedPassword, 
+                role, 
+                department 
+            }
+        });
 
+        // 4. Log the action
+        await prisma.auditLog.create({ 
+            data: { 
+                action: 'CREATED', 
+                entity: 'Staff', 
+                entityId: staff.id, 
+                details: `${name} added as ${role} (Login auto-generated)` 
+            } 
+        });
+
+        res.status(201).json(staff);
+    } catch (error) {
+        console.error("Error creating staff:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 // ─── DEPARTMENT ROUTES ───────────────────────────────────────────
 app.get('/api/departments', async (req, res) => {
     const departments = await prisma.department.findMany({ orderBy: { createdAt: 'asc' } });
