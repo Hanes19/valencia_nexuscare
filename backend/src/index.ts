@@ -326,6 +326,34 @@ app.post('/api/staff', async (req, res) => {
         console.error("Error creating staff:", error);
         res.status(500).json({ error: 'Internal server error' });
     }
+
+    app.delete('/api/staff/:id', async (req, res) => {
+    try {
+        const staff = await prisma.staff.findUnique({ where: { id: req.params.id } });
+        if (!staff) return res.status(404).json({ error: 'Staff not found' });
+
+        // 1. Delete the corresponding User account using the staff's email
+        await prisma.user.delete({ 
+            where: { email: staff.email } 
+        }).catch(() => {
+            console.log("No associated user account found to delete.");
+        });
+
+        // 2. Delete the Staff record
+        await prisma.staff.delete({ where: { id: req.params.id } });
+        
+        await prisma.auditLog.create({ 
+            data: { action: 'DELETED', entity: 'Staff', entityId: req.params.id, details: `${staff.name} removed` } 
+        });
+        
+        res.json({ message: 'Staff and associated user account removed' });
+    } catch (error) {
+        console.error("Error deleting staff:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
 });
 // ─── DEPARTMENT ROUTES ───────────────────────────────────────────
 app.get('/api/departments', async (req, res) => {
