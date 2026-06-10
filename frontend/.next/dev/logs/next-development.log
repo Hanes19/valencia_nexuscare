@@ -1,6 +1,4 @@
-{"timestamp":"00:00:02.138","source":"Server","level":"LOG","message":""}
-{"timestamp":"00:00:07.787","source":"Server","level":"ERROR","message":"(node:20064) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.\n(Use `node --trace-deprecation ...` to show where the warning was created)"}
-{"timestamp":"00:00:08.009","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
-{"timestamp":"00:00:08.109","source":"Browser","level":"LOG","message":"SW registered: http://localhost:3000/"}
-{"timestamp":"00:00:12.970","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
-{"timestamp":"00:00:13.021","source":"Browser","level":"LOG","message":"SW registered: http://localhost:3000/"}
+{"timestamp":"00:00:01.689","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:01.712","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:00:07.070","source":"Server","level":"LOG","message":"○ Compiling / ..."}
+{"timestamp":"00:03:06.887","source":"Server","level":"LOG","message":"✓ Finished writing to filesystem cache in 53s"}
